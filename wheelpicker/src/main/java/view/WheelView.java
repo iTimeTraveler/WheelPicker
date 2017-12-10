@@ -7,6 +7,7 @@ import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -22,18 +23,19 @@ import adapter.WheelAdapter;
 public class WheelView extends View {
 
 	private static final int SHOW_COUNT = 7;
+	private static final float MIN_DEGREE_DELTA_DISTANCE = 1f;
 
 	//半径
 	private int mRadius;
 	//item高度
 	private int mMaxItemHeight;
+	private int mMaxItemWidth;
 	//item夹角
 	private int mItemAngle = 180 / (SHOW_COUNT - 1);
 
 	private WheelAdapter mAdapter;
 	private DataSetObserver mDataSetObserver;
 
-	private Paint mBmpPaint;
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
 
@@ -66,7 +68,6 @@ public class WheelView extends View {
 	}
 
 	private void initData(Context context){
-		mBmpPaint = new Paint();
 		mScroller = new Scroller(context);
 		mGestureDetector = new GestureDetector(context, mOnGestureListener);
 	}
@@ -80,16 +81,16 @@ public class WheelView extends View {
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-		getMaxItemHeight();
+		measureMaxItemWidthHeight();
 		int radius = calculateRadius(mMaxItemHeight);
 		int diameter = radius << 1;
 
 		//适配wrap_content
 		if(widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST){
-			widthSize = 200;
+			widthSize = mMaxItemWidth;
 			heightSize = diameter;
 		}else if(widthMode == MeasureSpec.AT_MOST){
-			widthSize = 200;
+			widthSize = mMaxItemWidth;
 		}else if(heightMode == MeasureSpec.AT_MOST){
 			heightSize = diameter;
 		}
@@ -150,10 +151,11 @@ public class WheelView extends View {
 			mCamera.restore();
 			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2 + offsetY);
-//			mMatrix.setTranslate(0, offsetY);
 
 			canvas.save();
-			canvas.drawBitmap(bmp, mMatrix, mBmpPaint);
+			canvas.drawBitmap(bmp, mMatrix, null);
+			//设置图片抗锯齿
+			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
 			canvas.restore();
 		}
 	}
@@ -161,17 +163,20 @@ public class WheelView extends View {
 	/**
 	 * 遍历得到所有子View中的最大高度
 	 */
-	private int getMaxItemHeight(){
+	private void measureMaxItemWidthHeight(){
+		int maxWidth = 0;
 		int maxHeight = 0;
 		if(mAdapter != null){
 			for(int i = 0; i < mAdapter.getCount(); i++){
 				View v = mAdapter.getView(i);
 				v.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
 						MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+				maxWidth = Math.max(maxWidth, v.getMeasuredWidth());
 				maxHeight = Math.max(maxHeight, v.getMeasuredHeight());
 			}
 		}
-		return (mMaxItemHeight = maxHeight);
+		mMaxItemWidth = maxWidth;
+		mMaxItemHeight = maxHeight;
 	}
 
 	/**
@@ -216,7 +221,8 @@ public class WheelView extends View {
 
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-			return super.onScroll(e1, e2, distanceX, distanceY);
+			doScroll(distanceY);
+			return true;
 		}
 
 		@Override
@@ -224,4 +230,7 @@ public class WheelView extends View {
 			return super.onFling(e1, e2, velocityX, velocityY);
 		}
 	};
+
+	private void doScroll(float deltaY){
+	}
 }
