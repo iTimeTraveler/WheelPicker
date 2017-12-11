@@ -124,7 +124,7 @@ public class WheelView extends AbsWheelView {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-//		super.onDraw(canvas);
+		super.onDraw(canvas);
 
 		if(mAdapter != null){
 			float offsetY = 0;
@@ -138,6 +138,10 @@ public class WheelView extends AbsWheelView {
 				offsetY += itemView.getHeight();
 			}
 		}
+	}
+
+	@Override
+	protected void dispatchDraw(Canvas canvas) {
 	}
 
 	@Override
