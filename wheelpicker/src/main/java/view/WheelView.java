@@ -10,16 +10,10 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.Scroller;
 
 import adapter.WheelAdapter;
-
-import static android.support.v7.widget.ListViewCompat.NO_POSITION;
 
 /**
  * Created by iTimeTraveler on 2017/12/8.
@@ -28,7 +22,7 @@ public class WheelView extends AbsWheelView {
 	private static final String TAG = "WheelView";
 
 	private static final int SHOW_COUNT = 7;
-	private static final float MIN_DEGREE_DELTA_DISTANCE = 1f;
+	private static final int NO_POSITION = -1;
 
 	//半径
 	private int mRadius;
@@ -40,26 +34,19 @@ public class WheelView extends AbsWheelView {
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
-	private int mDegree;
-
-	private GestureDetector mGestureDetector;
-	private Scroller mScroller;
-
 
 	/**
 	 * Constructor
 	 */
 	public WheelView(Context context) {
-		super(context);
-		initData(context);
+		this(context, null);
 	}
 
 	/**
 	 * Constructor
 	 */
 	public WheelView(Context context, @Nullable AttributeSet attrs) {
-		super(context, attrs);
-		initData(context);
+		this(context, attrs, 0);
 	}
 
 	/**
@@ -71,8 +58,6 @@ public class WheelView extends AbsWheelView {
 	}
 
 	private void initData(Context context){
-		mScroller = new Scroller(context);
-		mGestureDetector = new GestureDetector(context, mOnGestureListener);
 	}
 
 	@Override
@@ -107,7 +92,7 @@ public class WheelView extends AbsWheelView {
 			// we can obtain exected minimum width and height.
 			measureScrapChild(child, 0, widthMeasureSpec, heightSize);
 
-			mRecycler.addScrapView(child);
+			mRecycler.addScrapView(child, 0);
 		}
 
 		// TODO: after first layout we should maybe start at the first visible position, not 0
@@ -115,11 +100,6 @@ public class WheelView extends AbsWheelView {
 
 		setMeasuredDimension(widthSize + getPaddingLeft() + getPaddingRight(),
 				heightSize + getPaddingTop() + getPaddingBottom() + 500);
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		super.onLayout(changed, l, t, r, b);
 	}
 
 	@Override
@@ -144,42 +124,25 @@ public class WheelView extends AbsWheelView {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
+//		super.onDraw(canvas);
 
-//		if(mAdapter != null){
-//			float offsetY = 0;
-//			int count = mAdapter.getCount();
-//			for(int i = 0; i < count - 1; i++){
-//				View itemView = mAdapter.getView(i);
-//
-//				int currentIdx = (SHOW_COUNT - 2) / 2;
-//				int degree = mItemAngle * (currentIdx - i) + mDegree;
-//				int h = drawItem(canvas, itemView, offsetY, degree);
-//				offsetY += itemView.getHeight();
-//			}
-//		}
+		if(mAdapter != null){
+			float offsetY = 0;
+			int count = mAdapter.getCount();
+			for(int i = 0; i < count - 1; i++){
+				View itemView = mAdapter.getView(i, null, this);
+
+				int currentIdx = (SHOW_COUNT - 2) / 2;
+				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
+				int h = drawItem(canvas, itemView, offsetY, degree);
+				offsetY += itemView.getHeight();
+			}
+		}
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if(mAdapter == null) return false;
-
-		switch (event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				break;
-			case MotionEvent.ACTION_MOVE:
-				mGestureDetector.onTouchEvent(event);
-				break;
-			case MotionEvent.ACTION_UP:
-				mDegree = 0;
-				break;
-		}
-		return true;
 	}
 
 	public void setAdapter(WheelAdapter adapter){
@@ -252,7 +215,7 @@ public class WheelView extends AbsWheelView {
 			}
 
 			// Recycle the view before we possibly return from the method
-			recycleBin.addScrapView(child);
+			recycleBin.addScrapView(child, -1);
 
 			returnedHeight += child.getMeasuredHeight();
 
@@ -568,28 +531,60 @@ public class WheelView extends AbsWheelView {
 		return view.getDrawingCache();
 	}
 
-	private GestureDetector.SimpleOnGestureListener mOnGestureListener = new GestureDetector.SimpleOnGestureListener(){
+	@Override
+	protected void doScroll(float deltaY) {
+		float incrementalDeltaY = deltaY;
+		final int childCount = getChildCount();
+		final boolean goUp = incrementalDeltaY < 0;
+		final int firstPosition = mFirstPosition;
 
-		@Override
-		public boolean onDown(MotionEvent e) {
-			return super.onDown(e);
+		int start = 0;
+		int count = 0;
+
+		//往上滑动
+		if(goUp){
+			int top = (int) -incrementalDeltaY;
+			top += getPaddingTop();
+			for (int i = 0; i < childCount; i++) {
+				final View child = getChildAt(i);
+				if (child.getBottom() >= top) {
+					break;
+				} else {
+					count++;
+					int position = firstPosition + i;
+					mRecycler.addScrapView(child, position);
+				}
+			}
+		}else{
+			int bottom = (int) (getHeight() - incrementalDeltaY);
+			bottom -= getPaddingBottom();
+			for (int i = childCount - 1; i >= 0; i--) {
+				final View child = getChildAt(i);
+				if (child.getTop() <= bottom) {
+					break;
+				} else {
+					start = i;
+					count++;
+					int position = firstPosition + i;
+					mRecycler.addScrapView(child, position);
+				}
+			}
 		}
 
-		@Override
-		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-			doScroll(distanceY);
-			return true;
+		if (count > 0) {
+			detachViewsFromParent(start, count);
 		}
 
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-			return super.onFling(e1, e2, velocityX, velocityY);
-		}
-	};
+//		offsetChildrenTopAndBottom(incrementalDeltaY);
 
-	private void doScroll(float deltaY){
+		if (goUp) {
+			mFirstPosition += count;
+		}
+
+		mRecycler.fullyDetachScrapViews();
+
 		if(mAdapter != null){
-			mDegree += (int) deltaY;
+			mScrollDegree += (int) deltaY;
 			Log.e("xwl", "deltaY:" + deltaY);
 			invalidate();
 		}

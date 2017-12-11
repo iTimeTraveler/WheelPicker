@@ -3,8 +3,11 @@ package view;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Scroller;
 
 import java.util.ArrayList;
 
@@ -21,11 +24,22 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	//当前显示的第一个元素
 	protected int mFirstPosition = 0;
-	protected int mOldItemCount;
+
+	//当前选中的项
+	protected int mCurrentSelectIndex = -1;
+
+	//滑动的角度
+	protected int mScrollDegree;
+
+	//总数
 	protected int mItemCount;
+	protected int mOldItemCount;
 
 	protected boolean mDataChanged = false;
 	protected final boolean[] mIsScrap = new boolean[1];
+
+	private GestureDetector mGestureDetector;
+	private Scroller mScroller;
 
 	/**
 	 * Subclasses must retain their measure spec from onMeasure() into this member
@@ -40,15 +54,36 @@ public abstract class AbsWheelView extends ViewGroup {
 
 
 	public AbsWheelView(Context context) {
-		super(context);
+		this(context, null);
 	}
 
 	public AbsWheelView(Context context, AttributeSet attrs) {
-		super(context, attrs);
+		this(context, attrs, 0);
 	}
 
 	public AbsWheelView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		initData(context);
+	}
+
+	private void initData(Context context){
+		mScroller = new Scroller(context);
+		mGestureDetector = new GestureDetector(context, mOnGestureListener);
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+
+		if (mAdapter != null && mDataSetObserver == null) {
+//			mDataSetObserver = new AdapterDataSetObserver();
+//			mAdapter.registerDataSetObserver(mDataSetObserver);
+
+			// Data may have changed while we were detached. Refresh.
+			mDataChanged = true;
+			mOldItemCount = mItemCount;
+			mItemCount = mAdapter.getCount();
+		}
 	}
 
 	@Override
@@ -72,26 +107,31 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	@Override
-	protected void onAttachedToWindow() {
-		super.onAttachedToWindow();
+	public boolean onTouchEvent(MotionEvent event) {
+		if(mAdapter == null) return false;
 
-		if (mAdapter != null && mDataSetObserver == null) {
-//			mDataSetObserver = new AdapterDataSetObserver();
-//			mAdapter.registerDataSetObserver(mDataSetObserver);
-
-			// Data may have changed while we were detached. Refresh.
-			mDataChanged = true;
-			mOldItemCount = mItemCount;
-			mItemCount = mAdapter.getCount();
+		switch (event.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				break;
+			case MotionEvent.ACTION_MOVE:
+				mGestureDetector.onTouchEvent(event);
+				break;
+			case MotionEvent.ACTION_UP:
+				mScrollDegree = 0;
+				break;
 		}
+		return true;
 	}
 
+	/**
+	 * 通过Adapter.getView重新加载一个View
+	 */
 	View obtainView(int position, boolean isScrap[]){
 		isScrap[0] = false;
 		final View scrapView = mRecycler.getScrapView(position);
 		final View child = mAdapter.getView(position, scrapView, this);
 		if (scrapView != null) {
-			mRecycler.addScrapView(scrapView);
+			mRecycler.addScrapView(scrapView, position);
 		}
 		setItemViewLayoutParams(child, position);
 		return child;
@@ -113,11 +153,31 @@ public abstract class AbsWheelView extends ViewGroup {
 		}
 	}
 
+	private GestureDetector.SimpleOnGestureListener mOnGestureListener = new GestureDetector.SimpleOnGestureListener(){
+
+		@Override
+		public boolean onDown(MotionEvent e) {
+			return super.onDown(e);
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+			doScroll(distanceY);
+			return true;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+			return super.onFling(e1, e2, velocityX, velocityY);
+		}
+	};
+
+	protected void doScroll(float deltaY){}
+
 	/**
 	 * Subclasses must override this method to layout their children.
 	 */
-	protected void layoutChildren() {
-	}
+	protected void layoutChildren() {}
 
 
 	class RecycleBin{
@@ -210,11 +270,13 @@ public abstract class AbsWheelView extends ViewGroup {
 		 * @param scrap
 		 *            The view to add
 		 */
-		void addScrapView(View scrap) {
+		void addScrapView(View scrap, int position) {
 			AbsWheelView.LayoutParams lp = (AbsWheelView.LayoutParams) scrap.getLayoutParams();
 			if (lp == null) {
 				return;
 			}
+			lp.scrappedFromPosition = position;
+
 			mCurrentScrap.add(scrap);
 		}
 
@@ -238,6 +300,23 @@ public abstract class AbsWheelView extends ViewGroup {
 			}
 		}
 
+		/**
+		 * At the end of a layout pass, all temp detached views should either be re-attached or
+		 * completely detached. This method ensures that any remaining view in the scrap list is
+		 * fully detached.
+		 */
+		void fullyDetachScrapViews() {
+			final int viewTypeCount = mViewTypeCount;
+			final ArrayList<View>[] scrapViews = mScrapViews;
+			for (int i = 0; i < viewTypeCount; ++i) {
+				final ArrayList<View> scrapPile = scrapViews[i];
+				for (int j = scrapPile.size() - 1; j >= 0; j--) {
+					final View view = scrapPile.get(j);
+					removeDetachedView(view, false);
+				}
+			}
+		}
+
 		public void markChildrenDirty() {
 			final ArrayList<View> scrap = mCurrentScrap;
 			final int scrapCount = scrap.size();
@@ -253,7 +332,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 
 	public static class LayoutParams extends ViewGroup.LayoutParams{
-		private static int scrappedFromPosition;
+		int scrappedFromPosition;
 
 		public LayoutParams(Context c, AttributeSet attrs) { super(c, attrs); }
 		public LayoutParams(int width, int height) { super(width, height); }
