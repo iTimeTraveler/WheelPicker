@@ -10,3 +10,4 @@
 .externalNativeBuild
 /app/ref
 /gradle/*
+build.gradle
