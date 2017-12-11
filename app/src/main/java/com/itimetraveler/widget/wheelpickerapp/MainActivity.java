@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        adapter = new NumericWheelAdapter(this, 1, 5);
+        adapter = new NumericWheelAdapter(this, 1, 6);
         mWheelView = (WheelView) findViewById(R.id.wheel_picker);
         mWheelView.setAdapter(adapter);
     }

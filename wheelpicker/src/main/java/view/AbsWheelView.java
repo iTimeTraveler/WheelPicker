@@ -1,17 +1,36 @@
 package view;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import adapter.WheelAdapter;
+
 /**
  * Created by iTimeTraveler on 2017/12/11.
  */
 public abstract class AbsWheelView extends ViewGroup {
-	private static final String TAG = "AbsWheelPicker";
+	private static final String TAG = "AbsWheelView";
+
+	protected WheelAdapter mAdapter;
+	protected DataSetObserver mDataSetObserver;
+
+	//当前显示的第一个元素
+	protected int mFirstPosition = 0;
+	protected int mOldItemCount;
+	protected int mItemCount;
+
+	protected boolean mDataChanged = false;
+	protected final boolean[] mIsScrap = new boolean[1];
+
+	/**
+	 * Subclasses must retain their measure spec from onMeasure() into this member
+	 */
+	int mWidthMeasureSpec = 0;
 
 	/**
 	 * The data set used to store unused views that should be reused during the next layout
@@ -44,6 +63,56 @@ public abstract class AbsWheelView extends ViewGroup {
 		layoutChildren();
 	}
 
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		if (getChildCount() > 0) {
+			mDataChanged = true;
+		}
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+
+		if (mAdapter != null && mDataSetObserver == null) {
+//			mDataSetObserver = new AdapterDataSetObserver();
+//			mAdapter.registerDataSetObserver(mDataSetObserver);
+
+			// Data may have changed while we were detached. Refresh.
+			mDataChanged = true;
+			mOldItemCount = mItemCount;
+			mItemCount = mAdapter.getCount();
+		}
+	}
+
+	View obtainView(int position, boolean isScrap[]){
+		isScrap[0] = false;
+		final View scrapView = mRecycler.getScrapView(position);
+		final View child = mAdapter.getView(position, scrapView, this);
+		if (scrapView != null) {
+			mRecycler.addScrapView(scrapView);
+		}
+		setItemViewLayoutParams(child, position);
+		return child;
+	}
+
+	private void setItemViewLayoutParams(View child, int position) {
+		final ViewGroup.LayoutParams vlp = child.getLayoutParams();
+		LayoutParams lp;
+		if (vlp == null) {
+			lp = (LayoutParams) generateDefaultLayoutParams();
+		} else if (!checkLayoutParams(vlp)) {
+			lp = (LayoutParams) generateLayoutParams(vlp);
+		} else {
+			lp = (LayoutParams) vlp;
+		}
+
+		if (lp != vlp) {
+			child.setLayoutParams(lp);
+		}
+	}
+
 	/**
 	 * Subclasses must override this method to layout their children.
 	 */
@@ -71,6 +140,22 @@ public abstract class AbsWheelView extends ViewGroup {
 		private ArrayList<View>[] mScrapViews;
 
 		private ArrayList<View> mCurrentScrap;
+
+		private int mViewTypeCount;
+
+		public void setViewTypeCount(int viewTypeCount) {
+			if (viewTypeCount < 1) {
+				throw new IllegalArgumentException("Can't have a viewTypeCount < 1");
+			}
+			//noinspection unchecked
+			ArrayList<View>[] scrapViews = new ArrayList[viewTypeCount];
+			for (int i = 0; i < viewTypeCount; i++) {
+				scrapViews[i] = new ArrayList<View>();
+			}
+			mViewTypeCount = viewTypeCount;
+			mCurrentScrap = scrapViews[0];
+			mScrapViews = scrapViews;
+		}
 
 
 		/**
@@ -119,12 +204,50 @@ public abstract class AbsWheelView extends ViewGroup {
 			return null;
 		}
 
+		/**
+		 * Put a view into the ScapViews list. These views are unordered.
+		 *
+		 * @param scrap
+		 *            The view to add
+		 */
+		void addScrapView(View scrap) {
+			AbsWheelView.LayoutParams lp = (AbsWheelView.LayoutParams) scrap.getLayoutParams();
+			if (lp == null) {
+				return;
+			}
+			mCurrentScrap.add(scrap);
+		}
+
+		/**
+		 * @return A view from the ScrapViews collection. These are unordered.
+		 */
+		View getScrapView(int position) {
+			final int whichScrap = mAdapter.getItemViewType(position);
+			if (whichScrap < 0) {
+				return null;
+			}
+			return retrieveFromScrap(mCurrentScrap, position);
+		}
+
+		private View retrieveFromScrap(ArrayList<View> scrapViews, int position) {
+			final int size = scrapViews.size();
+			if (size > 0) {
+				return scrapViews.remove(size - 1);
+			} else {
+				return null;
+			}
+		}
+
 		public void markChildrenDirty() {
 			final ArrayList<View> scrap = mCurrentScrap;
 			final int scrapCount = scrap.size();
 			for (int i = 0; i < scrapCount; i++) {
 				scrap.get(i).forceLayout();
 			}
+		}
+
+		public boolean shouldRecycleViewType(int viewType) {
+			return viewType >= 0;
 		}
 	}
 
@@ -135,5 +258,27 @@ public abstract class AbsWheelView extends ViewGroup {
 		public LayoutParams(Context c, AttributeSet attrs) { super(c, attrs); }
 		public LayoutParams(int width, int height) { super(width, height); }
 		public LayoutParams(ViewGroup.LayoutParams source) { super(source); }
+	}
+
+
+	@Override
+	protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+		return new AbsWheelView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+	}
+
+	@Override
+	protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+		return new LayoutParams(p);
+	}
+
+	@Override
+	public LayoutParams generateLayoutParams(AttributeSet attrs) {
+		return new AbsWheelView.LayoutParams(getContext(), attrs);
+	}
+
+	@Override
+	protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+		return p instanceof AbsWheelView.LayoutParams;
 	}
 }

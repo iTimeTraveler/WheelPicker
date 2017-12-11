@@ -22,12 +22,8 @@ public abstract class WheelAdapter implements Adapter {
 		dataSetObservable.unregisterObserver(observer);
 	}
 
-	public View getView(int position){
-		return null;
-	}
-
 	@Override
-	public final View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent) {
 		return null;
 	}
 

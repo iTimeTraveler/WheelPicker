@@ -3,6 +3,7 @@ package adapter;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.itimetraveler.widget.wheelpicker.R;
 
@@ -65,7 +66,7 @@ public class NumericWheelAdapter extends WheelAdapter {
 	}
 
 	@Override
-	public View getView(int position) {
+	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = inflater.inflate(R.layout.default_text_item_layout, null);
 		return view;
 	}
