@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +21,7 @@ import adapter.WheelAdapter;
 /**
  * Created by iTimeTraveler on 2017/12/8.
  */
-public class WheelView extends View {
+public class WheelView extends AbsWheelView {
 
 	private static final int SHOW_COUNT = 7;
 	private static final float MIN_DEGREE_DELTA_DISTANCE = 1f;
@@ -38,6 +39,7 @@ public class WheelView extends View {
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
+	private int mDegree;
 
 	private GestureDetector mGestureDetector;
 	private Scroller mScroller;
@@ -82,8 +84,7 @@ public class WheelView extends View {
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
 		measureMaxItemWidthHeight();
-		int radius = calculateRadius(mMaxItemHeight);
-		int diameter = radius << 1;
+		int diameter = (calculateRadius(mMaxItemHeight)) << 1;
 
 		//适配wrap_content
 		if(widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST){
@@ -94,7 +95,8 @@ public class WheelView extends View {
 		}else if(heightMode == MeasureSpec.AT_MOST){
 			heightSize = diameter;
 		}
-		setMeasuredDimension(widthSize, heightSize + 500);
+		setMeasuredDimension(widthSize + getPaddingLeft() + getPaddingRight(),
+				heightSize + getPaddingTop() + getPaddingBottom() + 500);
 	}
 
 	@Override
@@ -106,10 +108,15 @@ public class WheelView extends View {
 		super.onDraw(canvas);
 
 		if(mAdapter != null){
+			float offsetY = 0;
 			int count = mAdapter.getCount();
-			for(int i = 0; i < SHOW_COUNT - 1; i++){
+			for(int i = 0; i < count - 1; i++){
 				View itemView = mAdapter.getView(i);
-				drawItem(canvas, itemView, i);
+
+				int currentIdx = (SHOW_COUNT - 2) / 2;
+				int degree = mItemAngle * (currentIdx - i) + mDegree;
+				int h = drawItem(canvas, itemView, offsetY, degree);
+				offsetY += h;
 			}
 		}
 	}
@@ -122,8 +129,18 @@ public class WheelView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if(mAdapter == null) return false;
-		mGestureDetector.onTouchEvent(event);
-		return super.onTouchEvent(event);
+
+		switch (event.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				break;
+			case MotionEvent.ACTION_MOVE:
+				mGestureDetector.onTouchEvent(event);
+				break;
+			case MotionEvent.ACTION_UP:
+				mDegree = 0;
+				break;
+		}
+		return true;
 	}
 
 	public void setAdapter(WheelAdapter adapter){
@@ -137,27 +154,36 @@ public class WheelView extends View {
 	/**
 	 * 绘制单个item
 	 */
-	private void drawItem(Canvas canvas, View itemView, int index){
-		int currentIdx = (SHOW_COUNT - 2) / 2;
-		int degree = mItemAngle * (currentIdx - index);
-		int offsetY = calculateOffsetY(index);
+	private int drawItem(Canvas canvas, View itemView, float offsetY, int degree){
 		Bitmap bmp = convertViewToBitmap(itemView);
+		int height = 0;
 
 		if(bmp != null){
+			height = calculateHeightAfterRotate(degree, bmp.getHeight());
+
 			mCamera.save();
+			mCamera.translate(-mMaxItemWidth / 2, -mRadius, 0);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
 			mCamera.restore();
-			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
-			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2 + offsetY);
+//			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
+//			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
+
+			//使用pre将旋转中心移动到和Camera位置相同。
+			mMatrix.preTranslate(- bmp.getWidth() / 2 + mMaxItemWidth / 2, - bmp.getHeight() / 2 + mRadius);
+			// 使用post将图片(View)移动到原来的位置
+			mMatrix.postTranslate(bmp.getWidth() / 2 - mMaxItemWidth / 2, bmp.getHeight() / 2 - mRadius);
 
 			canvas.save();
+			canvas.translate(0, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
 			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
 			canvas.restore();
 		}
+
+		return height;
 	}
 
 	/**
@@ -193,10 +219,21 @@ public class WheelView extends View {
 	}
 
 	/**
+	 * 弯曲变换后的高度
+	 * @param degree
+	 * @param OldHeight
+	 */
+	private int calculateHeightAfterRotate(int degree, int OldHeight){
+		double angle = degree * Math.PI / 180;
+		return (int) (OldHeight * Math.cos(angle));
+	}
+
+	/**
 	 * 根据item高度计算半径
 	 * @param itemHeight
 	 */
 	private int calculateRadius(int itemHeight){
+		mItemAngle = 180 / (SHOW_COUNT - 1);
 		double sinHalfAngle = Math.sin(Math.PI * mItemAngle / 360);
 		return mRadius = (int) Math.ceil((itemHeight >> 1) / sinHalfAngle);
 	}
@@ -232,5 +269,10 @@ public class WheelView extends View {
 	};
 
 	private void doScroll(float deltaY){
+		if(mAdapter != null){
+			mDegree += (int) deltaY;
+			Log.e("xwl", "deltaY:" + deltaY);
+			invalidate();
+		}
 	}
 }
