@@ -4,11 +4,15 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Scroller;
+import android.widget.TextView;
+
+import com.itimetraveler.widget.wheelpicker.R;
 
 import java.util.ArrayList;
 
@@ -155,9 +159,14 @@ public abstract class AbsWheelView extends ViewGroup {
 		isScrap[0] = false;
 		final View scrapView = mRecycler.getScrapView(position);
 		final View child = mAdapter.getView(position, scrapView, this);
-		if (scrapView != null) {
-			mRecycler.addScrapView(scrapView, position);
-		}
+
+		TextView tv = child.findViewById(R.id.default_text_item);
+		String str = tv.getText().toString();
+		Log.e("xxx", "position:"+ position + ",  " + str);
+
+//		if (scrapView != null) {
+//			mRecycler.addScrapView(scrapView, position);
+//		}
 		setItemViewLayoutParams(child, position);
 		return child;
 	}
@@ -203,32 +212,32 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		//往上滑动
 		if(goUp){
-			int top = (int) -incrementalDeltaY;
-			top += getPaddingTop();
-			for (int i = 0; i < childCount; i++) {
-				final View child = getChildAt(i);
-				if (child.getBottom() >= top) {
-					break;
-				} else {
-					count++;
-					int position = firstPosition + i;
-					mRecycler.addScrapView(child, position);
-				}
-			}
-		}else{	//往下滑动
-			int bottom = (int) (getHeight() - incrementalDeltaY);
-			bottom -= getPaddingBottom();
-			for (int i = childCount - 1; i >= 0; i--) {
-				final View child = getChildAt(i);
-				if (child.getTop() <= bottom) {
-					break;
-				} else {
-					start = i;
-					count++;
-					int position = firstPosition + i;
-					mRecycler.addScrapView(child, position);
-				}
-			}
+//			int top = (int) -incrementalDeltaY;
+//			top += getPaddingTop();
+//			for (int i = 0; i < childCount; i++) {
+//				final View child = getChildAt(i);
+//				if (child.getBottom() >= top) {
+//					break;
+//				} else {
+//					count++;
+//					int position = firstPosition + i;
+//					mRecycler.addScrapView(child, position);
+//				}
+//			}
+//		}else{	//往下滑动
+//			int bottom = (int) (getHeight() - incrementalDeltaY);
+//			bottom -= getPaddingBottom();
+//			for (int i = childCount - 1; i >= 0; i--) {
+//				final View child = getChildAt(i);
+//				if (child.getTop() <= bottom) {
+//					break;
+//				} else {
+//					start = i;
+//					count++;
+//					int position = firstPosition + i;
+//					mRecycler.addScrapView(child, position);
+//				}
+//			}
 		}
 
 		if (count > 0) {

@@ -13,6 +13,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.itimetraveler.widget.wheelpicker.R;
 
 import java.util.HashMap;
 
@@ -91,16 +94,16 @@ public class WheelView extends AbsWheelView {
 
 
 		mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
-		if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED
-				|| heightMode == MeasureSpec.UNSPECIFIED)) {
-			final View child = obtainView(0, mIsScrap);
-
-			// Lay out child directly against the parent measure spec so that
-			// we can obtain exected minimum width and height.
-			measureScrapChild(child, 0, widthMeasureSpec, heightSize);
-
-			mRecycler.addScrapView(child, 0);
-		}
+//		if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED
+//				|| heightMode == MeasureSpec.UNSPECIFIED)) {
+//			final View child = obtainView(0, mIsScrap);
+//
+//			// Lay out child directly against the parent measure spec so that
+//			// we can obtain exected minimum width and height.
+//			measureScrapChild(child, 0, widthMeasureSpec, heightSize);
+//
+//			mRecycler.addScrapView(child, 0);
+//		}
 
 		// TODO: after first layout we should maybe start at the first visible position, not 0
 		measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
@@ -141,6 +144,10 @@ public class WheelView extends AbsWheelView {
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
 
+				TextView tv = itemView.findViewById(R.id.default_text_item);
+				String str = tv.getText().toString();
+				Log.e("xxxdraw", "position:"+ position + ",  " + str);
+
 //				int currentIdx = (SHOW_COUNT - 2) / 2;
 //				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
 
@@ -156,6 +163,16 @@ public class WheelView extends AbsWheelView {
 
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
+		final int firstPos = mFirstPosition;
+		int count = getChildCount();
+		for(int i = 0; i < count; i++) {
+			View itemView = getChildAt(i);
+			final int position = firstPos + i;
+
+			TextView tv = itemView.findViewById(R.id.default_text_item);
+			String str = tv.getText().toString();
+			Log.e("xxxdispatchDraw", "position:" + position + ",  " + str);
+		}
 	}
 
 	@Override
@@ -433,10 +450,28 @@ public class WheelView extends AbsWheelView {
 			p = new AbsWheelView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		}
 
+		TextView tv1 = child.findViewById(R.id.default_text_item);
+		String str1 = tv1.getText().toString();
+		Log.e("xxxsetupChild-before", "position:"+ position + ",  " + str1);
+
 		if (recycled) {
 			attachViewToParent(child, flowDown ? -1 : 0, p);
 		} else {
 			addViewInLayout(child, flowDown ? -1 : 0, p, true);
+		}
+
+		TextView tv = child.findViewById(R.id.default_text_item);
+		String str = tv.getText().toString();
+		Log.e("xxxsetupChild", "position:"+ position + ",  " + str);
+
+
+		int count = getChildCount();
+		for(int i = 0; i < count; i++) {
+			View itemView = getChildAt(i);
+
+			TextView tvx = itemView.findViewById(R.id.default_text_item);
+			String strx = tvx.getText().toString();
+			Log.e("xxxsetupChild-----round", "position:" + i + ",  " + strx);
 		}
 
 		if (needToMeasure) {
