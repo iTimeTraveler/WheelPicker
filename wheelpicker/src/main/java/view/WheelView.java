@@ -163,16 +163,6 @@ public class WheelView extends AbsWheelView {
 
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
-		final int firstPos = mFirstPosition;
-		int count = getChildCount();
-		for(int i = 0; i < count; i++) {
-			View itemView = getChildAt(i);
-			final int position = firstPos + i;
-
-			TextView tv = itemView.findViewById(R.id.default_text_item);
-			String str = tv.getText().toString();
-			Log.e("xxxdispatchDraw", "position:" + position + ",  " + str);
-		}
 	}
 
 	@Override
@@ -343,7 +333,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillUp(int pos, int nextBottom){
 		int end = getPaddingTop();
-		while (nextBottom > end && pos >= 0) {
+		while (isDegreeVisiable(getDeflectionDegree(pos)) && pos >= 0) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextBottom, false, getPaddingLeft(), false);
 
@@ -362,7 +352,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillDown(int pos, int nextTop) {
 		int end = (getBottom() - getTop());
-		while (nextTop < end && pos < mItemCount) {
+		while (isDegreeVisiable(getDeflectionDegree(pos)) && pos < mItemCount) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
 
@@ -642,6 +632,22 @@ public class WheelView extends AbsWheelView {
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
 		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
+	}
+
+	private boolean isDegreeVisiable(int degree){
+		return (degree >= -90 && degree <= 90);
+	}
+
+	/**
+	 * 根据序号计算偏转角
+	 * @param position
+	 */
+	private int getDeflectionDegree(int position){
+		if(position < 0 || position > mItemCount){
+			return Integer.MIN_VALUE;
+		}
+		int offsetDegree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
+		return offsetDegree;
 	}
 
 	public void setSelectItem(int index){
