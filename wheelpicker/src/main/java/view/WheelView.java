@@ -126,16 +126,18 @@ public class WheelView extends AbsWheelView {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
+		final int firstPos = mFirstPosition;
 		if(mAdapter != null){
 			float offsetY = 0;
-			int count = mAdapter.getCount();
-			for(int i = 0; i < count - 1; i++){
-				View itemView = mAdapter.getView(i, null, this);
+			int count = getChildCount();
+			for(int i = 0; i < count; i++){
+				View itemView = getChildAt(i);
+				final int position = firstPos + i;
 
 				int currentIdx = (SHOW_COUNT - 2) / 2;
 				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
 				int h = drawItem(canvas, itemView, offsetY, degree);
-				offsetY += itemView.getHeight();
+				offsetY += h;
 			}
 		}
 	}
@@ -535,12 +537,23 @@ public class WheelView extends AbsWheelView {
 		return view.getDrawingCache();
 	}
 
+	/**
+	 * 根据弧长计算变化的弧度
+	 * @param deltaY
+	 */
+	private int calculateScrollDegree(float deltaY){
+		boolean negative = deltaY < 0;
+		double circumference = 2 * Math.PI * mRadius;
+		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? -1 : 1);
+	}
+
 	@Override
-	protected void doScroll(float deltaY) {
+	protected void onTouchMove(float deltaY) {
 		float incrementalDeltaY = deltaY;
 		final int childCount = getChildCount();
-		final boolean goUp = incrementalDeltaY < 0;
 		final int firstPosition = mFirstPosition;
+		final int deltaDegree = calculateScrollDegree(deltaY);
+		final boolean goUp = deltaY < 0;
 
 		int start = 0;
 		int count = 0;

@@ -2,10 +2,11 @@ package view;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Scroller;
 
@@ -22,7 +23,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected WheelAdapter mAdapter;
 	protected DataSetObserver mDataSetObserver;
 
-	//当前显示的第一个元素
+	//可见的第一个元素
 	protected int mFirstPosition = 0;
 
 	//当前选中的项
@@ -30,6 +31,8 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	//滑动的角度
 	protected int mScrollDegree;
+	protected float mLastDownY;
+	protected float mLastMoveY;
 
 	//总数
 	protected int mItemCount;
@@ -38,8 +41,10 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected boolean mDataChanged = false;
 	protected final boolean[] mIsScrap = new boolean[1];
 
-	private GestureDetector mGestureDetector;
+	//用于完成滚动操作
 	private Scroller mScroller;
+	//判定为拖动的最小移动像素数
+	private int mTouchSlop;
 
 	/**
 	 * Subclasses must retain their measure spec from onMeasure() into this member
@@ -68,7 +73,9 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	private void initData(Context context){
 		mScroller = new Scroller(context);
-		mGestureDetector = new GestureDetector(context, mOnGestureListener);
+		ViewConfiguration configuration = ViewConfiguration.get(context);
+		// 获取TouchSlop值
+		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
 	}
 
 	@Override
@@ -107,16 +114,34 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		switch (ev.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				mLastDownY = mLastMoveY = ev.getRawY();
+				break;
+			case MotionEvent.ACTION_MOVE:
+				float delta = ev.getRawX() - mLastMoveY;
+				mLastMoveY = ev.getRawY();
+				//当手指拖动值大于TouchSlop值时，认为应该进行滚动，拦截子控件的事件
+				if(delta > mTouchSlop){
+					return true;
+				}
+				break;
+		}
+		return super.onInterceptTouchEvent(ev);
+	}
+
+	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if(mAdapter == null) return false;
 
 		switch (event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				break;
 			case MotionEvent.ACTION_MOVE:
-				mGestureDetector.onTouchEvent(event);
+				onTouchMove(event.getRawY() - mLastMoveY);
+				mLastMoveY = event.getRawY();
 				break;
 			case MotionEvent.ACTION_UP:
+				//TODO 当手指抬起时，根据当前的滚动值来判定应该自动滚动选中哪个子控件
 				mScrollDegree = 0;
 				break;
 		}
@@ -153,26 +178,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		}
 	}
 
-	private GestureDetector.SimpleOnGestureListener mOnGestureListener = new GestureDetector.SimpleOnGestureListener(){
-
-		@Override
-		public boolean onDown(MotionEvent e) {
-			return super.onDown(e);
-		}
-
-		@Override
-		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-			doScroll(distanceY);
-			return true;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-			return super.onFling(e1, e2, velocityX, velocityY);
-		}
-	};
-
-	protected void doScroll(float deltaY){}
+	protected void onTouchMove(float deltaY){}
 
 	/**
 	 * Subclasses must override this method to layout their children.
