@@ -27,7 +27,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected int mFirstPosition = 0;
 
 	//当前选中的项
-	protected int mCurrentSelectIndex = -1;
+	protected int mCurrentSelectPosition = 0;
 
 	//滑动的角度
 	protected int mScrollDegree;
@@ -123,10 +123,10 @@ public abstract class AbsWheelView extends ViewGroup {
 				float delta = ev.getRawX() - mLastMoveY;
 				mLastMoveY = ev.getRawY();
 				//当手指拖动值大于TouchSlop值时，认为应该进行滚动，拦截子控件的事件
-				if(delta > mTouchSlop){
+//				if(delta > mTouchSlop){
 					return true;
-				}
-				break;
+//				}
+//				break;
 		}
 		return super.onInterceptTouchEvent(ev);
 	}
@@ -137,7 +137,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		switch (event.getAction()){
 			case MotionEvent.ACTION_MOVE:
-				onTouchMove(event.getRawY() - mLastMoveY);
+				trackMotionScroll(event.getRawY() - mLastMoveY);
 				mLastMoveY = event.getRawY();
 				break;
 			case MotionEvent.ACTION_UP:
@@ -178,12 +178,90 @@ public abstract class AbsWheelView extends ViewGroup {
 		}
 	}
 
-	protected void onTouchMove(float deltaY){}
+	/**
+	 * 滚动事件
+	 * @param deltaY
+	 */
+	protected void trackMotionScroll(float deltaY){
+		final int childCount = getChildCount();
+		if (childCount == 0) {
+			return;
+		}
+
+		float incrementalDeltaY = deltaY;
+		final int firstPosition = mFirstPosition;
+		final boolean goUp = deltaY < 0;
+
+		final int firstTop = getChildAt(0).getTop();
+		final int lastBottom = getChildAt(childCount - 1).getBottom();
+		final int spaceAbove = getPaddingTop() - firstTop;
+		final int end = getHeight() - getPaddingBottom();
+		final int spaceBelow = lastBottom - end;
+
+		int start = 0;
+		int count = 0;
+
+		//往上滑动
+		if(goUp){
+			int top = (int) -incrementalDeltaY;
+			top += getPaddingTop();
+			for (int i = 0; i < childCount; i++) {
+				final View child = getChildAt(i);
+				if (child.getBottom() >= top) {
+					break;
+				} else {
+					count++;
+					int position = firstPosition + i;
+					mRecycler.addScrapView(child, position);
+				}
+			}
+		}else{	//往下滑动
+			int bottom = (int) (getHeight() - incrementalDeltaY);
+			bottom -= getPaddingBottom();
+			for (int i = childCount - 1; i >= 0; i--) {
+				final View child = getChildAt(i);
+				if (child.getTop() <= bottom) {
+					break;
+				} else {
+					start = i;
+					count++;
+					int position = firstPosition + i;
+					mRecycler.addScrapView(child, position);
+				}
+			}
+		}
+
+		if (count > 0) {
+			detachViewsFromParent(start, count);
+		}
+
+//		offsetChildrenTopAndBottom(incrementalDeltaY);
+
+		if (goUp) {
+			mFirstPosition += count;
+		}
+
+//		final int absIncrementalDeltaY = (int) Math.abs(incrementalDeltaY);
+//		if (spaceAbove < absIncrementalDeltaY || spaceBelow < absIncrementalDeltaY) {
+//			fillGap(goUp);
+//		}
+		mRecycler.fullyDetachScrapViews();
+	}
 
 	/**
 	 * Subclasses must override this method to layout their children.
 	 */
 	protected void layoutChildren() {}
+
+	/**
+	 * Fills the gap left open by a touch-scroll. During a touch scroll, children that
+	 * remain on screen are shifted and the other ones are discarded. The role of this
+	 * method is to fill the gap thus created by performing a partial layout in the
+	 * empty space.
+	 *
+	 * @param down true if the scroll is going down, false if it is going up
+	 */
+	abstract void fillGap(boolean down);
 
 
 	class RecycleBin{

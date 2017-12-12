@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
@@ -12,6 +13,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.HashMap;
 
 import adapter.WheelAdapter;
 
@@ -31,6 +34,9 @@ public class WheelView extends AbsWheelView {
 	private int mMaxItemWidth;
 	//item夹角
 	private int mItemAngle = 180 / (SHOW_COUNT - 1);
+
+	//每一个View对应的弯曲角度
+	private HashMap<View, Integer> childrenAngleMap;
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
@@ -58,6 +64,7 @@ public class WheelView extends AbsWheelView {
 	}
 
 	private void initData(Context context){
+		setSelectItem(0);
 	}
 
 	@Override
@@ -98,8 +105,9 @@ public class WheelView extends AbsWheelView {
 		// TODO: after first layout we should maybe start at the first visible position, not 0
 		measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
 
-		setMeasuredDimension(widthSize + getPaddingLeft() + getPaddingRight(),
-				heightSize + getPaddingTop() + getPaddingBottom() + 500);
+		setMeasuredDimension(widthSize, heightSize);
+//		setMeasuredDimension(widthSize + getPaddingLeft() + getPaddingRight(),
+//				heightSize + getPaddingTop() + getPaddingBottom());
 	}
 
 	@Override
@@ -128,18 +136,22 @@ public class WheelView extends AbsWheelView {
 
 		final int firstPos = mFirstPosition;
 		if(mAdapter != null){
-			float offsetY = 0;
 			int count = getChildCount();
 			for(int i = 0; i < count; i++){
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
 
-				int currentIdx = (SHOW_COUNT - 2) / 2;
-				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
-				int h = drawItem(canvas, itemView, offsetY, degree);
-				offsetY += h;
+//				int currentIdx = (SHOW_COUNT - 2) / 2;
+//				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
+
+				int degree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
+				drawItem(canvas, itemView, position, degree);
 			}
 		}
+
+		Paint linePaint = new Paint();
+		linePaint.setColor(Color.parseColor("#990000"));
+		canvas.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, linePaint);
 	}
 
 	@Override
@@ -342,6 +354,23 @@ public class WheelView extends AbsWheelView {
 		}
 	}
 
+	@Override
+	void fillGap(boolean down) {
+		final int count = getChildCount();
+		//down表示向上滑动的操作
+		if (down) {
+			int paddingTop = getPaddingTop();
+			final int startOffset = count > 0 ? getChildAt(count - 1).getBottom() :
+					paddingTop;
+			fillDown(mFirstPosition + count, startOffset);
+		} else {
+			int paddingBottom = getPaddingBottom();
+			final int startOffset = count > 0 ? getChildAt(0).getTop() :
+					getHeight() - paddingBottom;
+			fillUp(mFirstPosition - 1, startOffset);
+		}
+	}
+
 	/**
 	 * Obtain the view and add it to our list of children. The view can be made
 	 * fresh, converted from an unused view, or used as is if it was in the
@@ -442,15 +471,30 @@ public class WheelView extends AbsWheelView {
 	/**
 	 * 绘制单个item
 	 */
-	private int drawItem(Canvas canvas, View itemView, float offsetY, int degree){
+	private int drawItem(Canvas canvas, View itemView, int position, int degree){
 		Bitmap bmp = convertViewToBitmap(itemView);
+		int offsetZ = calculateItemOffsetZ(degree);
+		int offsetY = calculateItemOffsetY(degree);
+//		int offsetY = position * mMaxItemHeight;
 		int height = 0;
+
 
 		if(bmp != null){
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
 
+			int gap = (mMaxItemHeight - height) >> 1;
+//			int cameraGap = (int) (offsetZ * Math.cos(degree * Math.PI / 180));
+			offsetY += degree > 0 ? -gap : -gap;
+
+			Log.v(TAG, "position:" + position + ", degree:" + degree + ", offsetY:" + offsetY);
+			Log.v(TAG, "position:" + position + ", mRadius:" + (mRadius) + ", offsetY-mRadius:" + (offsetY - mRadius));
+			Log.v(TAG, ".");
+
+			mMatrix.reset();
 			mCamera.save();
-//			mCamera.translate(-mMaxItemWidth / 2, -mRadius, 0);
+//			mCamera.translate(-mMaxItemWidth / 2, -mRadius, mCamera.getLocationZ());
+			//镜头距离
+			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), mCamera.getLocationZ() + offsetZ);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -469,6 +513,11 @@ public class WheelView extends AbsWheelView {
 			//设置图片抗锯齿
 			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
 			canvas.restore();
+
+
+			Paint linePaint = new Paint();
+			linePaint.setColor(Color.parseColor("#00AA00"));
+			canvas.drawLine(0, offsetY, getWidth(), offsetY, linePaint);
 		}
 
 		return height;
@@ -494,16 +543,40 @@ public class WheelView extends AbsWheelView {
 	}
 
 	/**
-	 * 计算竖直偏移
-	 * @param index
+	 * View转换为Bitmap
+	 * @param view
 	 */
-	private int calculateOffsetY(int index){
-		if(index < 0 || index >= SHOW_COUNT){
+	private Bitmap convertViewToBitmap(View view){
+		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+		view.buildDrawingCache();
+		return view.getDrawingCache();
+	}
+
+	/**
+	 * 根据旋转角计算竖直偏移，用于绘制
+	 * @param degree
+	 */
+	private int calculateItemOffsetY(int degree){
+		if(degree <= -90 || degree >= 90){
 			return 0;
 		}
-		double angle = (index + 0.5) * mItemAngle * Math.PI / 180;
-		int offset = (int) (mRadius * (1 - Math.cos(angle)));
-		return offset;
+		double offsetAngle = (degree + (mItemAngle >> 1)) * Math.PI / 180;
+		double offsetY = mRadius * (1 - Math.sin(offsetAngle));
+		return (int) (offsetY < 0 ? Math.floor(offsetY) : Math.ceil(offsetY));
+	}
+
+	/**
+	 * 根据旋转角度计算镜头需要拉远的距离
+	 * @param degree
+	 */
+	private int calculateItemOffsetZ(int degree){
+		if(degree <= -90 || degree >= 90){
+			return 0;
+		}
+		double angle = degree * Math.PI / 180;
+		double offsetZ = mRadius * (1 - Math.cos(angle));
+		return (int) offsetZ;
 	}
 
 	/**
@@ -527,83 +600,34 @@ public class WheelView extends AbsWheelView {
 	}
 
 	/**
-	 * View转换为Bitmap
-	 * @param view
-	 */
-	private Bitmap convertViewToBitmap(View view){
-		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-		view.buildDrawingCache();
-		return view.getDrawingCache();
-	}
-
-	/**
 	 * 根据弧长计算变化的弧度
 	 * @param deltaY
 	 */
 	private int calculateScrollDegree(float deltaY){
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
-		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? -1 : 1);
+		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
+	}
+
+	public void setSelectItem(int index){
+		if(mAdapter == null || index < 0 || index >= mAdapter.getCount()){
+			return;
+		}
+		mCurrentSelectPosition = index;
 	}
 
 	@Override
-	protected void onTouchMove(float deltaY) {
-		float incrementalDeltaY = deltaY;
-		final int childCount = getChildCount();
-		final int firstPosition = mFirstPosition;
+	protected void trackMotionScroll(float deltaY) {
+		super.trackMotionScroll(deltaY);
+
 		final int deltaDegree = calculateScrollDegree(deltaY);
-		final boolean goUp = deltaY < 0;
 
-		int start = 0;
-		int count = 0;
-
-		//往上滑动
-		if(goUp){
-			int top = (int) -incrementalDeltaY;
-			top += getPaddingTop();
-			for (int i = 0; i < childCount; i++) {
-				final View child = getChildAt(i);
-				if (child.getBottom() >= top) {
-					break;
-				} else {
-					count++;
-					int position = firstPosition + i;
-					mRecycler.addScrapView(child, position);
-				}
-			}
-		}else{
-			int bottom = (int) (getHeight() - incrementalDeltaY);
-			bottom -= getPaddingBottom();
-			for (int i = childCount - 1; i >= 0; i--) {
-				final View child = getChildAt(i);
-				if (child.getTop() <= bottom) {
-					break;
-				} else {
-					start = i;
-					count++;
-					int position = firstPosition + i;
-					mRecycler.addScrapView(child, position);
-				}
-			}
+		//填补空白区域
+		if(Math.abs(deltaDegree) >= (mItemAngle >> 1)){
+			fillGap(deltaDegree > 0);
 		}
-
-		if (count > 0) {
-			detachViewsFromParent(start, count);
-		}
-
-//		offsetChildrenTopAndBottom(incrementalDeltaY);
-
-		if (goUp) {
-			mFirstPosition += count;
-		}
-
-		mRecycler.fullyDetachScrapViews();
-
-		if(mAdapter != null){
-			mScrollDegree += (int) deltaY;
-			Log.e("xwl", "deltaY:" + deltaY);
-			invalidate();
-		}
+		mScrollDegree += deltaDegree;
+		Log.e("xwl", "deltaY:" + deltaY);
+		invalidate();
 	}
 }

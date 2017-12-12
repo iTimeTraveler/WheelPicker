@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.itimetraveler.widget.wheelpicker.R;
 
@@ -67,7 +68,22 @@ public class NumericWheelAdapter extends WheelAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = inflater.inflate(R.layout.default_text_item_layout, null);
-		return view;
+		ViewHolder viewHolder;
+
+		if(convertView != null){
+			viewHolder = (ViewHolder) convertView.getTag();
+		}else{
+			viewHolder = new ViewHolder();
+			convertView = inflater.inflate(R.layout.default_text_item_layout, null);
+			viewHolder.textView = convertView.findViewById(R.id.default_text_item);
+			convertView.setTag(viewHolder);
+		}
+		viewHolder.textView.setText("wheel-picker" + position);
+		return convertView;
+	}
+
+
+	private static class ViewHolder{
+		TextView textView;
 	}
 }
