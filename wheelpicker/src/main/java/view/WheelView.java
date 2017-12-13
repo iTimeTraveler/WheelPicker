@@ -626,7 +626,13 @@ public class WheelView extends AbsWheelView {
 	protected int calculateScrollDegree(float deltaY){
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
-		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1) * 5;
+		int d = (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
+		if(d < -(mCurrentSelectPosition * mItemAngle)){
+			d = -mCurrentSelectPosition * mItemAngle;
+		}else if(d > (mItemCount - mCurrentSelectPosition - 1) * mItemAngle){
+			d = (mItemCount - mCurrentSelectPosition - 1) * mItemAngle;
+		}
+		return d;
 	}
 
 	public void setSelectItem(int index){

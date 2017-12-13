@@ -2,8 +2,11 @@ package view;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -18,6 +21,11 @@ import adapter.WheelAdapter;
  */
 public abstract class AbsWheelView extends ViewGroup {
 	private static final String TAG = "AbsWheelView";
+
+	private static final int MSG_DO_SCROLL = 1;
+	private static final int MSG_FINISH_SCROLL = 2;
+
+	private static final int MSG_SMOOTH_SCORLL_INTERVAL = 10;
 
 	protected WheelAdapter mAdapter;
 	protected DataSetObserver mDataSetObserver;
@@ -44,6 +52,39 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	//判定为拖动的最小移动像素数
 	private int mTouchSlop;
+
+	private Handler mHandler = new Handler(new Handler.Callback(){
+		@Override
+		public boolean handleMessage(Message msg) {
+			switch (msg.what){
+				case MSG_DO_SCROLL:
+					if(msg.arg1 == 0){
+						return true;
+					}
+					mScrollDegree -= msg.arg1;
+					if(Math.abs(mScrollDegree) <= Math.abs(msg.arg1)){
+						mHandler.removeMessages(MSG_FINISH_SCROLL);
+						mHandler.sendEmptyMessageDelayed(MSG_FINISH_SCROLL, MSG_SMOOTH_SCORLL_INTERVAL);
+					}else{
+						doScroll(mScrollDegree > 0);
+
+						Message message = new Message();
+						message.what = MSG_DO_SCROLL;
+						message.arg1 = msg.arg1;
+						mHandler.removeMessages(MSG_DO_SCROLL);
+						mHandler.sendMessageDelayed(message, MSG_SMOOTH_SCORLL_INTERVAL);
+					}
+					break;
+				case MSG_FINISH_SCROLL:
+					mScrollDegree = 0;
+					doScroll(false);
+					mHandler.removeMessages(MSG_DO_SCROLL);
+					mHandler.removeMessages(MSG_FINISH_SCROLL);
+					break;
+			}
+			return true;
+		}
+	});
 
 	/**
 	 * Subclasses must retain their measure spec from onMeasure() into this member
@@ -134,6 +175,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		switch (event.getAction()){
 			case MotionEvent.ACTION_DOWN:
 				mLastDownY = mLastMoveY = event.getRawY();
+				cancleScroll();
 				break;
 			case MotionEvent.ACTION_MOVE:
 				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
@@ -144,8 +186,26 @@ public abstract class AbsWheelView extends ViewGroup {
 				// 第二步，调用startScroll()方法来初始化滚动数据并刷新界面
 //				rawY = event.getRawY();
 //				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
-				mScrollDegree = 0;
-				invalidate();
+
+				int degree = mScrollDegree % mItemAngle;
+				if(Math.abs(degree) >= mItemAngle / 2){
+					mCurrentSelectPosition += degree >= 0 ?
+							mScrollDegree / mItemAngle + 1:
+							mScrollDegree / mItemAngle - 1;
+
+					degree = degree >= 0 ?
+							degree - mItemAngle :
+							degree + mItemAngle;
+				}else{
+					mCurrentSelectPosition += mScrollDegree / mItemAngle;
+				}
+				mScrollDegree = degree;
+
+				Message msg = new Message();
+				msg.what = MSG_DO_SCROLL;
+				msg.arg1 = degree >= 0 ? Math.max(degree / 10, 1) : Math.min(degree / 10, -1);
+				mHandler.removeMessages(MSG_DO_SCROLL);
+				mHandler.sendMessageDelayed(msg, MSG_SMOOTH_SCORLL_INTERVAL);
 				break;
 		}
 		return true;
@@ -197,17 +257,23 @@ public abstract class AbsWheelView extends ViewGroup {
 		if (childCount == 0) {
 			return;
 		}
+		mScrollDegree = calculateScrollDegree(deltaY);
+		final boolean goUp = incrementalDeltaY < 0;
+		doScroll(goUp);
+	}
+
+	private void doScroll(boolean goUp){
+		final int childCount = getChildCount();
+		if (childCount == 0) {
+			return;
+		}
 
 		final int firstPosition = mFirstPosition;
-		final boolean goUp = incrementalDeltaY < 0;
-
 		final int firstTop = getChildAt(0).getTop();
 		final int lastBottom = getChildAt(childCount - 1).getBottom();
 		final int spaceAbove = getPaddingTop() - firstTop;
 		final int end = getHeight() - getPaddingBottom();
 		final int spaceBelow = lastBottom - end;
-
-		mScrollDegree = calculateScrollDegree(deltaY);
 
 		int start = 0;	//需要回收的起始位置
 		int count = 0;	//回收的View数量
@@ -252,9 +318,15 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		//填补空白区域
 //		if(Math.abs(mScrollDegree) >= (mItemAngle >> 1)){
-			fillGap(goUp);
+		fillGap(goUp);
 //		}
-		invalidate();
+		postInvalidate();
+	}
+
+	private void cancleScroll(){
+		mHandler.removeMessages(MSG_DO_SCROLL);
+		mHandler.removeMessages(MSG_FINISH_SCROLL);
+		postInvalidate();
 	}
 
 	/**
