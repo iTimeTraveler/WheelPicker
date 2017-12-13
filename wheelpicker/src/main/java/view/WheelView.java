@@ -13,10 +13,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.itimetraveler.widget.wheelpicker.R;
-
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 import adapter.WheelAdapter;
@@ -27,7 +25,7 @@ import adapter.WheelAdapter;
 public class WheelView extends AbsWheelView {
 	private static final String TAG = "WheelView";
 
-	private static final int SHOW_COUNT = 7;
+	private static final int SHOW_COUNT = 11;
 	private static final int NO_POSITION = -1;
 
 	//半径
@@ -35,8 +33,6 @@ public class WheelView extends AbsWheelView {
 	//item高度
 	private int mMaxItemHeight;
 	private int mMaxItemWidth;
-	//item夹角
-	private int mItemAngle = 180 / (SHOW_COUNT - 1);
 
 	//每一个View对应的弯曲角度
 	private HashMap<View, Integer> childrenAngleMap;
@@ -67,6 +63,7 @@ public class WheelView extends AbsWheelView {
 	}
 
 	private void initData(Context context){
+		mItemAngle = 180 / (SHOW_COUNT - 1);
 		setSelectItem(0);
 	}
 
@@ -126,11 +123,11 @@ public class WheelView extends AbsWheelView {
 
 		final int childrenTop = getPaddingTop();
 		final int childCount = getChildCount();
-		if (childCount == 0) {
-			fillFromTop(childrenTop);
-		}else{
+//		if (childCount == 0) {
+//			fillFromTop(childrenTop);
+//		}else{
 			fillSpecific(mFirstPosition, childrenTop);
-		}
+//		}
 	}
 
 	@Override
@@ -143,13 +140,6 @@ public class WheelView extends AbsWheelView {
 			for(int i = 0; i < count; i++){
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
-
-				TextView tv = itemView.findViewById(R.id.default_text_item);
-				String str = tv.getText().toString();
-				Log.e("xxxdraw", "position:"+ position + ",  " + str);
-
-//				int currentIdx = (SHOW_COUNT - 2) / 2;
-//				int degree = mItemAngle * (currentIdx - i) + mScrollDegree;
 
 				int degree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
 				drawItem(canvas, itemView, position, degree);
@@ -440,28 +430,10 @@ public class WheelView extends AbsWheelView {
 			p = new AbsWheelView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		}
 
-		TextView tv1 = child.findViewById(R.id.default_text_item);
-		String str1 = tv1.getText().toString();
-		Log.e("xxxsetupChild-before", "position:"+ position + ",  " + str1);
-
 		if (recycled) {
 			attachViewToParent(child, flowDown ? -1 : 0, p);
 		} else {
 			addViewInLayout(child, flowDown ? -1 : 0, p, true);
-		}
-
-		TextView tv = child.findViewById(R.id.default_text_item);
-		String str = tv.getText().toString();
-		Log.e("xxxsetupChild", "position:"+ position + ",  " + str);
-
-
-		int count = getChildCount();
-		for(int i = 0; i < count; i++) {
-			View itemView = getChildAt(i);
-
-			TextView tvx = itemView.findViewById(R.id.default_text_item);
-			String strx = tvx.getText().toString();
-			Log.e("xxxsetupChild-----round", "position:" + i + ",  " + strx);
 		}
 
 		if (needToMeasure) {
@@ -499,7 +471,7 @@ public class WheelView extends AbsWheelView {
 	private int drawItem(Canvas canvas, View itemView, int position, int degree){
 		Bitmap bmp = convertViewToBitmap(itemView);
 		int offsetZ = calculateItemOffsetZ(degree);
-		int offsetY = calculateItemOffsetY(degree);
+		float offsetY = calculateItemOffsetY(degree);
 //		int offsetY = position * mMaxItemHeight;
 		int height = 0;
 
@@ -508,8 +480,10 @@ public class WheelView extends AbsWheelView {
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
 
 			int gap = (mMaxItemHeight - height) >> 1;
+			double temp = Math.cos(degree * Math.PI / 180);
 //			int cameraGap = (int) (offsetZ * Math.cos(degree * Math.PI / 180));
-			offsetY += degree > 0 ? -gap : -gap;
+			int cameraGap = 0;
+			offsetY += degree > 0 ? -gap * temp : -gap;
 
 			Log.v(TAG, "position:" + position + ", degree:" + degree + ", offsetY:" + offsetY);
 			Log.v(TAG, "position:" + position + ", mRadius:" + (mRadius) + ", offsetY-mRadius:" + (offsetY - mRadius));
@@ -543,6 +517,18 @@ public class WheelView extends AbsWheelView {
 			Paint linePaint = new Paint();
 			linePaint.setColor(Color.parseColor("#00AA00"));
 			canvas.drawLine(0, offsetY, getWidth(), offsetY, linePaint);
+
+			Paint textPaint = new Paint();
+			textPaint.setColor(Color.parseColor("#00AA00"));
+			textPaint.setTextSize(15);
+			canvas.drawText("" + position,0, offsetY, textPaint);
+
+			Paint linePaint1 = new Paint();
+			linePaint1.setColor(Color.parseColor("#000066"));
+			canvas.drawLine(0, offsetY + height, getWidth(), offsetY + height, linePaint1);
+
+			textPaint.setColor(Color.parseColor("#000066"));
+			canvas.drawText("" + position, getWidth() - 20, offsetY + height, textPaint);
 		}
 
 		return height;
@@ -582,13 +568,21 @@ public class WheelView extends AbsWheelView {
 	 * 根据旋转角计算竖直偏移，用于绘制
 	 * @param degree
 	 */
-	private int calculateItemOffsetY(int degree){
+	private float calculateItemOffsetY(int degree){
 		if(degree <= -90 || degree >= 90){
 			return 0;
 		}
+		BigDecimal offsetA =
+				new BigDecimal(mItemAngle)
+				.divide(new BigDecimal(2.0), BigDecimal.ROUND_HALF_UP)
+				.add(new BigDecimal(degree))
+				.multiply(new BigDecimal(Math.PI))
+				.divide(new BigDecimal(180), BigDecimal.ROUND_HALF_UP);
+		BigDecimal y = new BigDecimal(mRadius)
+				.multiply(new BigDecimal(1 - Math.sin(offsetA.doubleValue())));
 		double offsetAngle = (degree + (mItemAngle >> 1)) * Math.PI / 180;
 		double offsetY = mRadius * (1 - Math.sin(offsetAngle));
-		return (int) (offsetY < 0 ? Math.floor(offsetY) : Math.ceil(offsetY));
+		return y.floatValue();
 	}
 
 	/**
@@ -628,26 +622,11 @@ public class WheelView extends AbsWheelView {
 	 * 根据弧长计算变化的弧度
 	 * @param deltaY
 	 */
-	private int calculateScrollDegree(float deltaY){
+	@Override
+	protected int calculateScrollDegree(float deltaY){
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
-		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
-	}
-
-	private boolean isDegreeVisiable(int degree){
-		return (degree >= -90 && degree <= 90);
-	}
-
-	/**
-	 * 根据序号计算偏转角
-	 * @param position
-	 */
-	private int getDeflectionDegree(int position){
-		if(position < 0 || position > mItemCount){
-			return Integer.MIN_VALUE;
-		}
-		int offsetDegree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
-		return offsetDegree;
+		return (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1) * 5;
 	}
 
 	public void setSelectItem(int index){
@@ -657,18 +636,13 @@ public class WheelView extends AbsWheelView {
 		mCurrentSelectPosition = index;
 	}
 
+	/**
+	 * 滚动事件
+	 * @param deltaY Down事件以来移动的总距离
+	 * @param incrementalDeltaY Move事件的移动距离
+	 */
 	@Override
-	protected void trackMotionScroll(float deltaY) {
-		super.trackMotionScroll(deltaY);
-
-		final int deltaDegree = calculateScrollDegree(deltaY);
-
-		//填补空白区域
-		if(Math.abs(deltaDegree) >= (mItemAngle >> 1)){
-			fillGap(deltaDegree > 0);
-		}
-		mScrollDegree += deltaDegree;
-		Log.e("xwl", "deltaY:" + deltaY);
-		invalidate();
+	protected void trackMotionScroll(float deltaY, float incrementalDeltaY){
+		super.trackMotionScroll(deltaY, incrementalDeltaY);
 	}
 }

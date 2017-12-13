@@ -4,15 +4,10 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.Scroller;
-import android.widget.TextView;
-
-import com.itimetraveler.widget.wheelpicker.R;
 
 import java.util.ArrayList;
 
@@ -35,6 +30,8 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	//滑动的角度
 	protected int mScrollDegree;
+	//item夹角
+	protected int mItemAngle;
 	protected float mLastDownY;
 	protected float mLastMoveY;
 
@@ -45,8 +42,6 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected boolean mDataChanged = false;
 	protected final boolean[] mIsScrap = new boolean[1];
 
-	//用于完成滚动操作
-	private Scroller mScroller;
 	//判定为拖动的最小移动像素数
 	private int mTouchSlop;
 
@@ -76,7 +71,6 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	private void initData(Context context){
-		mScroller = new Scroller(context);
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		// 获取TouchSlop值
 		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
@@ -120,17 +114,14 @@ public abstract class AbsWheelView extends ViewGroup {
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
 		switch (ev.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				mLastDownY = mLastMoveY = ev.getRawY();
-				break;
 			case MotionEvent.ACTION_MOVE:
 				float delta = ev.getRawX() - mLastMoveY;
 				mLastMoveY = ev.getRawY();
 				//当手指拖动值大于TouchSlop值时，认为应该进行滚动，拦截子控件的事件
-//				if(delta > mTouchSlop){
+				if(delta > mTouchSlop){
 					return true;
-//				}
-//				break;
+				}
+				break;
 		}
 		return super.onInterceptTouchEvent(ev);
 	}
@@ -139,14 +130,22 @@ public abstract class AbsWheelView extends ViewGroup {
 	public boolean onTouchEvent(MotionEvent event) {
 		if(mAdapter == null) return false;
 
+		float rawY = event.getRawY();
 		switch (event.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				mLastDownY = mLastMoveY = event.getRawY();
+				break;
 			case MotionEvent.ACTION_MOVE:
-				trackMotionScroll(event.getRawY() - mLastMoveY);
-				mLastMoveY = event.getRawY();
+				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
+				mLastMoveY = rawY;
 				break;
 			case MotionEvent.ACTION_UP:
 				//TODO 当手指抬起时，根据当前的滚动值来判定应该自动滚动选中哪个子控件
+				// 第二步，调用startScroll()方法来初始化滚动数据并刷新界面
+//				rawY = event.getRawY();
+//				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
 				mScrollDegree = 0;
+				invalidate();
 				break;
 		}
 		return true;
@@ -160,13 +159,12 @@ public abstract class AbsWheelView extends ViewGroup {
 		final View scrapView = mRecycler.getScrapView(position);
 		final View child = mAdapter.getView(position, scrapView, this);
 
-		TextView tv = child.findViewById(R.id.default_text_item);
-		String str = tv.getText().toString();
-		Log.e("xxx", "position:"+ position + ",  " + str);
-
-//		if (scrapView != null) {
-//			mRecycler.addScrapView(scrapView, position);
-//		}
+		if (scrapView != null) {
+			if (child != scrapView) {
+				// Failed to re-bind the data, return scrap to the heap.
+				mRecycler.addScrapView(scrapView, position);
+			}
+		}
 		setItemViewLayoutParams(child, position);
 		return child;
 	}
@@ -188,18 +186,20 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	/**
-	 * 滚动事件
-	 * @param deltaY
+	 * Track a motion scroll 滚动事件
+	 *
+	 * @param deltaY Amount to offset mMotionView. This is the accumulated delta since the motion
+	 *        began. Positive numbers mean the user's finger is moving down the screen.
+	 * @param incrementalDeltaY Change in deltaY from the previous event.
 	 */
-	protected void trackMotionScroll(float deltaY){
+	protected void trackMotionScroll(float deltaY, float incrementalDeltaY){
 		final int childCount = getChildCount();
 		if (childCount == 0) {
 			return;
 		}
 
-		float incrementalDeltaY = deltaY;
 		final int firstPosition = mFirstPosition;
-		final boolean goUp = deltaY < 0;
+		final boolean goUp = incrementalDeltaY < 0;
 
 		final int firstTop = getChildAt(0).getTop();
 		final int lastBottom = getChildAt(childCount - 1).getBottom();
@@ -207,55 +207,81 @@ public abstract class AbsWheelView extends ViewGroup {
 		final int end = getHeight() - getPaddingBottom();
 		final int spaceBelow = lastBottom - end;
 
-		int start = 0;
-		int count = 0;
+		mScrollDegree = calculateScrollDegree(deltaY);
+
+		int start = 0;	//需要回收的起始位置
+		int count = 0;	//回收的View数量
 
 		//往上滑动
 		if(goUp){
-//			int top = (int) -incrementalDeltaY;
-//			top += getPaddingTop();
-//			for (int i = 0; i < childCount; i++) {
-//				final View child = getChildAt(i);
-//				if (child.getBottom() >= top) {
-//					break;
-//				} else {
-//					count++;
-//					int position = firstPosition + i;
-//					mRecycler.addScrapView(child, position);
-//				}
-//			}
-//		}else{	//往下滑动
-//			int bottom = (int) (getHeight() - incrementalDeltaY);
-//			bottom -= getPaddingBottom();
-//			for (int i = childCount - 1; i >= 0; i--) {
-//				final View child = getChildAt(i);
-//				if (child.getTop() <= bottom) {
-//					break;
-//				} else {
-//					start = i;
-//					count++;
-//					int position = firstPosition + i;
-//					mRecycler.addScrapView(child, position);
-//				}
-//			}
+			for (int i = 0; i < childCount; i++) {
+				final View child = getChildAt(i);
+				int position = firstPosition + i;
+				int degree = getDeflectionDegree(position);
+				if (isDegreeVisiable(degree)) {
+					break;
+				} else {
+					count++;
+					mRecycler.addScrapView(child, position);
+				}
+			}
+		}else{	//往下滑动
+			for (int i = childCount - 1; i >= 0; i--) {
+				final View child = getChildAt(i);
+				int position = firstPosition + i;
+				int degree = getDeflectionDegree(position);
+				if (isDegreeVisiable(degree)) {
+					break;
+				} else {
+					start = i;
+					count++;
+					mRecycler.addScrapView(child, position);
+				}
+			}
 		}
 
 		if (count > 0) {
 			detachViewsFromParent(start, count);
 		}
 
-//		offsetChildrenTopAndBottom(incrementalDeltaY);
-
 		if (goUp) {
 			mFirstPosition += count;
 		}
 
-//		final int absIncrementalDeltaY = (int) Math.abs(incrementalDeltaY);
-//		if (spaceAbove < absIncrementalDeltaY || spaceBelow < absIncrementalDeltaY) {
-//			fillGap(goUp);
-//		}
 		mRecycler.fullyDetachScrapViews();
+
+		//填补空白区域
+//		if(Math.abs(mScrollDegree) >= (mItemAngle >> 1)){
+			fillGap(goUp);
+//		}
+		invalidate();
 	}
+
+	/**
+	 * 根据序号计算偏转角
+	 * @param position
+	 */
+	protected int getDeflectionDegree(int position){
+		if(position < 0 || position > mItemCount){
+			return Integer.MIN_VALUE;
+		}
+		int offsetDegree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
+		return offsetDegree;
+	}
+
+	/**
+	 * 偏转之后是否可见，用于回收策略
+	 * @param degree
+	 */
+	protected boolean isDegreeVisiable(int degree){
+		return (degree >= -90 && degree <= 90);
+	}
+
+	/**
+	 * 根据弧长计算变化的弧度
+	 * @param deltaY
+	 */
+	abstract int calculateScrollDegree(float deltaY);
 
 	/**
 	 * Subclasses must override this method to layout their children.
