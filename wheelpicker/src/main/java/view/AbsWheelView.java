@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -25,6 +26,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	private static final int MSG_DO_SCROLL = 1;
 	private static final int MSG_FINISH_SCROLL = 2;
 
+	//滚动动画时间间隔
 	private static final int MSG_SMOOTH_SCORLL_INTERVAL = 10;
 
 	protected WheelAdapter mAdapter;
@@ -52,6 +54,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 	//判定为拖动的最小移动像素数
 	private int mTouchSlop;
+	private GestureDetector mGestureDetector;
 
 	private Handler mHandler = new Handler(new Handler.Callback(){
 		@Override
@@ -115,6 +118,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		// 获取TouchSlop值
 		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
+		mGestureDetector = new GestureDetector(context, new SimpleGestureListener());
 	}
 
 	@Override
@@ -172,43 +176,88 @@ public abstract class AbsWheelView extends ViewGroup {
 		if(mAdapter == null) return false;
 
 		float rawY = event.getRawY();
-		switch (event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				mLastDownY = mLastMoveY = event.getRawY();
-				cancleScroll();
-				break;
-			case MotionEvent.ACTION_MOVE:
-				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
-				mLastMoveY = rawY;
-				break;
-			case MotionEvent.ACTION_UP:
-				//TODO 当手指抬起时，根据当前的滚动值来判定应该自动滚动选中哪个子控件
-				// 第二步，调用startScroll()方法来初始化滚动数据并刷新界面
-//				rawY = event.getRawY();
+//		switch (event.getAction()){
+//			case MotionEvent.ACTION_DOWN:
+//				mLastDownY = mLastMoveY = event.getRawY();
+//				cancleScroll();
+//				break;
+//			case MotionEvent.ACTION_MOVE:
 //				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
-
-				int degree = mScrollDegree % mItemAngle;
-				if(Math.abs(degree) >= mItemAngle / 2){
-					mCurrentSelectPosition += degree >= 0 ?
-							mScrollDegree / mItemAngle + 1:
-							mScrollDegree / mItemAngle - 1;
-
-					degree = degree >= 0 ?
-							degree - mItemAngle :
-							degree + mItemAngle;
-				}else{
-					mCurrentSelectPosition += mScrollDegree / mItemAngle;
-				}
-				mScrollDegree = degree;
-
-				Message msg = new Message();
-				msg.what = MSG_DO_SCROLL;
-				msg.arg1 = degree >= 0 ? Math.max(degree / 10, 1) : Math.min(degree / 10, -1);
-				mHandler.removeMessages(MSG_DO_SCROLL);
-				mHandler.sendMessageDelayed(msg, MSG_SMOOTH_SCORLL_INTERVAL);
-				break;
-		}
+//				mLastMoveY = rawY;
+//				break;
+//			case MotionEvent.ACTION_UP:
+//				//TODO 当手指抬起时，根据当前的滚动值来判定应该自动滚动选中哪个子控件
+//				// 第二步，调用startScroll()方法来初始化滚动数据并刷新界面
+////				rawY = event.getRawY();
+////				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
+//
+//				int degree = mScrollDegree % mItemAngle;
+//				if(Math.abs(degree) >= mItemAngle / 2){
+//					mCurrentSelectPosition += degree >= 0 ?
+//							mScrollDegree / mItemAngle + 1:
+//							mScrollDegree / mItemAngle - 1;
+//
+//					degree = degree >= 0 ?
+//							degree - mItemAngle :
+//							degree + mItemAngle;
+//				}else{
+//					mCurrentSelectPosition += mScrollDegree / mItemAngle;
+//				}
+//				mScrollDegree = degree;
+//
+//				Message msg = new Message();
+//				msg.what = MSG_DO_SCROLL;
+//				msg.arg1 = degree >= 0 ? Math.max(degree / 10, 1) : Math.min(degree / 10, -1);
+//				mHandler.removeMessages(MSG_DO_SCROLL);
+//				mHandler.sendMessageDelayed(msg, MSG_SMOOTH_SCORLL_INTERVAL);
+//				break;
+//		}
+		mGestureDetector.onTouchEvent(event);
 		return true;
+	}
+
+	/**
+	 * 手势监听
+	 */
+	private class SimpleGestureListener extends GestureDetector.SimpleOnGestureListener{
+
+		@Override
+		public boolean onDown(MotionEvent e) {
+			Log.e("gesture", "onDown: " + e.toString());
+			mScrollDegree = 0;
+			postInvalidate();
+			return true;
+		}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			Log.e("gesture", "onSingleTapUp: " + e.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent downE, MotionEvent moveE, float distanceX, float distanceY) {
+			Log.e("gesture", "onScroll:============================start================================");
+			Log.e("gesture", "onScroll: e1 >>> " + downE.toString());
+			Log.e("gesture", "onScroll: e2 >>> " + moveE.toString());
+			Log.e("gesture", "onScroll: distanceX >>> " + distanceX);
+			Log.e("gesture", "onScroll: distanceY >>> " + distanceY);
+			Log.e("gesture", "onScroll:============================end================================");
+
+			trackMotionScroll(moveE.getRawY() - downE.getRawY(), -distanceY);
+			return true;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+			Log.e("gesture", "onFling:----------------------------start----------------------------");
+			Log.e("gesture", "onFling: e1 >>> " + e1.toString());
+			Log.e("gesture", "onFling: e2 >>> " + e2.toString());
+			Log.e("gesture", "onFling: velocityX >>> " + velocityX);
+			Log.e("gesture", "onFling: velocityY >>> " + velocityY);
+			Log.e("gesture", "onFling:----------------------------end----------------------------");
+			return true;
+		}
 	}
 
 	/**
@@ -312,6 +361,8 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		if (goUp) {
 			mFirstPosition += count;
+		}else{
+			mFirstPosition -= count;
 		}
 
 		mRecycler.fullyDetachScrapViews();
