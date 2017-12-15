@@ -141,7 +141,7 @@ public class WheelView extends AbsWheelView {
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
 
-				int degree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
+				int degree = (mCurrentSelectPosition - position) * mItemAngle + mScrollingDegree;
 				drawItem(canvas, itemView, position, degree);
 			}
 		}

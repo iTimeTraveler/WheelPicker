@@ -23,9 +23,6 @@ import adapter.WheelAdapter;
 public abstract class AbsWheelView extends ViewGroup {
 	private static final String TAG = "AbsWheelView";
 
-	private static final int MSG_DO_SCROLL = 1;
-	private static final int MSG_FINISH_SCROLL = 2;
-
 	//滚动动画时间间隔
 	private static final int MSG_SMOOTH_SCORLL_INTERVAL = 10;
 
@@ -39,7 +36,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected int mCurrentSelectPosition = 0;
 
 	//滑动的角度
-	protected int mScrollDegree;
+	protected int mScrollingDegree;
 	//item夹角
 	protected int mItemAngle;
 	protected float mLastDownY;
@@ -55,39 +52,6 @@ public abstract class AbsWheelView extends ViewGroup {
 	//判定为拖动的最小移动像素数
 	private int mTouchSlop;
 	private GestureDetector mGestureDetector;
-
-	private Handler mHandler = new Handler(new Handler.Callback(){
-		@Override
-		public boolean handleMessage(Message msg) {
-			switch (msg.what){
-				case MSG_DO_SCROLL:
-					if(msg.arg1 == 0){
-						return true;
-					}
-					mScrollDegree -= msg.arg1;
-					if(Math.abs(mScrollDegree) <= Math.abs(msg.arg1)){
-						mHandler.removeMessages(MSG_FINISH_SCROLL);
-						mHandler.sendEmptyMessageDelayed(MSG_FINISH_SCROLL, MSG_SMOOTH_SCORLL_INTERVAL);
-					}else{
-						doScroll(mScrollDegree > 0);
-
-						Message message = new Message();
-						message.what = MSG_DO_SCROLL;
-						message.arg1 = msg.arg1;
-						mHandler.removeMessages(MSG_DO_SCROLL);
-						mHandler.sendMessageDelayed(message, MSG_SMOOTH_SCORLL_INTERVAL);
-					}
-					break;
-				case MSG_FINISH_SCROLL:
-					mScrollDegree = 0;
-					doScroll(false);
-					mHandler.removeMessages(MSG_DO_SCROLL);
-					mHandler.removeMessages(MSG_FINISH_SCROLL);
-					break;
-			}
-			return true;
-		}
-	});
 
 	/**
 	 * Subclasses must retain their measure spec from onMeasure() into this member
@@ -118,7 +82,8 @@ public abstract class AbsWheelView extends ViewGroup {
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		// 获取TouchSlop值
 		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
-		mGestureDetector = new GestureDetector(context, new SimpleGestureListener());
+		mGestureDetector = new GestureDetector(context, mSimpleOnGestureListener);
+		mGestureDetector.setIsLongpressEnabled(false);
 	}
 
 	@Override
@@ -191,25 +156,25 @@ public abstract class AbsWheelView extends ViewGroup {
 ////				rawY = event.getRawY();
 ////				trackMotionScroll(rawY - mLastDownY, rawY - mLastMoveY);
 //
-//				int degree = mScrollDegree % mItemAngle;
+//				int degree = mScrollingDegree % mItemAngle;
 //				if(Math.abs(degree) >= mItemAngle / 2){
 //					mCurrentSelectPosition += degree >= 0 ?
-//							mScrollDegree / mItemAngle + 1:
-//							mScrollDegree / mItemAngle - 1;
+//							mScrollingDegree / mItemAngle + 1:
+//							mScrollingDegree / mItemAngle - 1;
 //
 //					degree = degree >= 0 ?
 //							degree - mItemAngle :
 //							degree + mItemAngle;
 //				}else{
-//					mCurrentSelectPosition += mScrollDegree / mItemAngle;
+//					mCurrentSelectPosition += mScrollingDegree / mItemAngle;
 //				}
-//				mScrollDegree = degree;
+//				mScrollingDegree = degree;
 //
 //				Message msg = new Message();
-//				msg.what = MSG_DO_SCROLL;
+//				msg.what = MESSAGE_DO_SCROLL;
 //				msg.arg1 = degree >= 0 ? Math.max(degree / 10, 1) : Math.min(degree / 10, -1);
-//				mHandler.removeMessages(MSG_DO_SCROLL);
-//				mHandler.sendMessageDelayed(msg, MSG_SMOOTH_SCORLL_INTERVAL);
+//				mAnimHandler.removeMessages(MESSAGE_DO_SCROLL);
+//				mAnimHandler.sendMessageDelayed(msg, MSG_SMOOTH_SCORLL_INTERVAL);
 //				break;
 //		}
 		mGestureDetector.onTouchEvent(event);
@@ -217,14 +182,13 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	/**
-	 * 手势监听
+	 * 手势监听 gesture listener
 	 */
-	private class SimpleGestureListener extends GestureDetector.SimpleOnGestureListener{
+	private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener(){
 
 		@Override
 		public boolean onDown(MotionEvent e) {
 			Log.e("gesture", "onDown: " + e.toString());
-			mScrollDegree = 0;
 			postInvalidate();
 			return true;
 		}
@@ -306,7 +270,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		if (childCount == 0) {
 			return;
 		}
-		mScrollDegree = calculateScrollDegree(deltaY);
+		mScrollingDegree = calculateScrollDegree(deltaY);
 		final boolean goUp = incrementalDeltaY < 0;
 		doScroll(goUp);
 	}
@@ -361,23 +325,27 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		if (goUp) {
 			mFirstPosition += count;
-		}else{
-			mFirstPosition -= count;
 		}
 
 		mRecycler.fullyDetachScrapViews();
 
 		//填补空白区域
-//		if(Math.abs(mScrollDegree) >= (mItemAngle >> 1)){
+//		if(Math.abs(mScrollingDegree) >= (mItemAngle >> 1)){
 		fillGap(goUp);
 //		}
 		postInvalidate();
 	}
 
 	private void cancleScroll(){
-		mHandler.removeMessages(MSG_DO_SCROLL);
-		mHandler.removeMessages(MSG_FINISH_SCROLL);
+		mAnimHandler.removeMessages(MESSAGE_DO_SCROLL);
+		mAnimHandler.removeMessages(MESSAGE_STOP_SCROLL);
 		postInvalidate();
+	}
+
+	/**
+	 * 校准选中 rectify wheel
+	 */
+	private void rectify() {
 	}
 
 	/**
@@ -388,7 +356,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		if(position < 0 || position > mItemCount){
 			return Integer.MIN_VALUE;
 		}
-		int offsetDegree = (mCurrentSelectPosition - position) * mItemAngle + mScrollDegree;
+		int offsetDegree = (mCurrentSelectPosition - position) * mItemAngle + mScrollingDegree;
 		return offsetDegree;
 	}
 
@@ -406,6 +374,63 @@ public abstract class AbsWheelView extends ViewGroup {
 	 */
 	abstract int calculateScrollDegree(float deltaY);
 
+	// Messages
+	private static final int MESSAGE_DO_SCROLL = 1;
+	private static final int MESSAGE_DO_JUSTIFY = 2;
+	private static final int MESSAGE_STOP_SCROLL = 3;
+
+	// animation handler
+	private Handler mAnimHandler = new Handler(new Handler.Callback(){
+		@Override
+		public boolean handleMessage(Message msg) {
+			switch (msg.what){
+				case MESSAGE_DO_SCROLL:
+					if(msg.arg1 == 0){
+						return true;
+					}
+					mScrollingDegree -= msg.arg1;
+					if(Math.abs(mScrollingDegree) <= Math.abs(msg.arg1)){
+						mAnimHandler.removeMessages(MESSAGE_STOP_SCROLL);
+						mAnimHandler.sendEmptyMessageDelayed(MESSAGE_STOP_SCROLL, MSG_SMOOTH_SCORLL_INTERVAL);
+					}else{
+						doScroll(mScrollingDegree > 0);
+
+						Message message = new Message();
+						message.what = MESSAGE_DO_SCROLL;
+						message.arg1 = msg.arg1;
+						mAnimHandler.removeMessages(MESSAGE_DO_SCROLL);
+						mAnimHandler.sendMessageDelayed(message, MSG_SMOOTH_SCORLL_INTERVAL);
+					}
+					break;
+				case MESSAGE_STOP_SCROLL:
+					mScrollingDegree = 0;
+					doScroll(false);
+					mAnimHandler.removeMessages(MESSAGE_DO_SCROLL);
+					mAnimHandler.removeMessages(MESSAGE_STOP_SCROLL);
+					break;
+			}
+			return true;
+		}
+	});
+
+	/**
+	 * Set next message to queue. Clears queue before.
+	 * @param message the message to set
+	 */
+	private void setNextMessage(int message) {
+		clearMessages();
+		mAnimHandler.sendEmptyMessage(message);
+	}
+
+	/**
+	 * Clears messages from queue
+	 */
+	private void clearMessages() {
+		mAnimHandler.removeMessages(MESSAGE_DO_SCROLL);
+		mAnimHandler.removeMessages(MESSAGE_DO_JUSTIFY);
+		mAnimHandler.removeMessages(MESSAGE_STOP_SCROLL);
+	}
+
 	/**
 	 * Subclasses must override this method to layout their children.
 	 */
@@ -422,6 +447,15 @@ public abstract class AbsWheelView extends ViewGroup {
 	abstract void fillGap(boolean down);
 
 
+	/**
+	 * View回收器
+	 *
+	 * The RecycleBin facilitates reuse of views across layouts. The RecycleBin has two levels of
+	 * storage: ActiveViews and ScrapViews. ActiveViews are those views which were onscreen at the
+	 * start of a layout. By construction, they are displaying current information. At the end of
+	 * layout, all views in ActiveViews are demoted to ScrapViews. ScrapViews are old views that
+	 * could potentially be used by the adapter to avoid allocating views unnecessarily.
+	 */
 	class RecycleBin{
 		/**
 		 * The position of the first view stored in mActiveViews.
