@@ -141,7 +141,7 @@ public class WheelView extends AbsWheelView {
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
 
-				int degree = (mCurrentSelectPosition - position) * mItemAngle + mScrollingDegree;
+				int degree = (mCurrentItemIndex - position) * mItemAngle + mScrollingDegree;
 				drawItem(canvas, itemView, position, degree);
 			}
 		}
@@ -159,18 +159,6 @@ public class WheelView extends AbsWheelView {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
-
-	public void setAdapter(WheelAdapter adapter){
-		if(mAdapter != null && mDataSetObserver != null){
-			mAdapter.unregisterDataSetObserver(mDataSetObserver);
-		}
-		mAdapter = adapter;
-		mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
-
-		requestLayout();
-		invalidate();
-	}
-
 
 	/**
 	 * Measures the height of the given range of children (inclusive) and
@@ -627,10 +615,10 @@ public class WheelView extends AbsWheelView {
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
 		int d = (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
-		if(d < -(mCurrentSelectPosition * mItemAngle)){
-			d = -mCurrentSelectPosition * mItemAngle;
-		}else if(d > (mItemCount - mCurrentSelectPosition - 1) * mItemAngle){
-			d = (mItemCount - mCurrentSelectPosition - 1) * mItemAngle;
+		if(d < -(mCurrentItemIndex * mItemAngle)){
+			d = -mCurrentItemIndex * mItemAngle;
+		}else if(d > (mItemCount - mCurrentItemIndex - 1) * mItemAngle){
+			d = (mItemCount - mCurrentItemIndex - 1) * mItemAngle;
 		}
 		return d;
 	}
@@ -639,16 +627,6 @@ public class WheelView extends AbsWheelView {
 		if(mAdapter == null || index < 0 || index >= mAdapter.getCount()){
 			return;
 		}
-		mCurrentSelectPosition = index;
-	}
-
-	/**
-	 * 滚动事件
-	 * @param deltaY Down事件以来移动的总距离
-	 * @param incrementalDeltaY Move事件的移动距离
-	 */
-	@Override
-	protected void trackMotionScroll(float deltaY, float incrementalDeltaY){
-		super.trackMotionScroll(deltaY, incrementalDeltaY);
+		mCurrentItemIndex = index;
 	}
 }
