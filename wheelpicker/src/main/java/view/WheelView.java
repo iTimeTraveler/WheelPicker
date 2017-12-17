@@ -328,7 +328,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillDown(int pos, int nextTop) {
 		int end = (getBottom() - getTop());
-		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount - 1) {
+		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
 
