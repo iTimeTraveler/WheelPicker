@@ -262,11 +262,11 @@ public abstract class AbsWheelView extends ViewGroup {
 			Log.e("gesture", "onFling: velocityY >>> " + velocityY);
 			Log.e("gesture", "onFling:----------------------------end----------------------------");
 
-			mLastFlingY = 0;
 			int startY = calculateScrollArcLength(mScrollingDegree);
 			int minY = -(calculateScrollArcLength(mCurrentItemIndex * mItemAngle));
 			int maxY = calculateScrollArcLength((mItemCount - mCurrentItemIndex - 1) * mItemAngle);
 			Log.e("MESSAGE_DO_FLING=====", "mScrollingDegree:"+ mScrollingDegree + ", startY:"+ startY+ " ,velocityY:" + -velocityY + ", minY:"+ minY + ", maxY:"+ maxY);
+			mLastFlingY = startY;
 			mScroller.fling(0, startY, 0, (int) -velocityY, 0, 0, minY, maxY);
 			sendNextMessage(MESSAGE_DO_FLING);
 			return true;
@@ -395,7 +395,6 @@ public abstract class AbsWheelView extends ViewGroup {
 		//滚动角度超过mItemAngle就顺势定位到下一个
 		if(inertia || Math.abs(remainDegree) >= mItemAngle / 2){
 			idealCount += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? 1 : -1);
-
 			remainDegree += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? -mItemAngle : mItemAngle);
 		}
 
@@ -486,9 +485,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					mScrollingDegree += velocityDegree;
 					mLastFlingY = currY;
-					if (mScrollingDegree != 0) {
-						doScroll(mScrollingDegree > 0);
-					}
+					doScroll(velocityDegree > 0);
 
 					Log.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
@@ -508,9 +505,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					mScrollingDegree -= currY - mLastScrollY;
 					mLastScrollY = currY;
-					if (mScrollingDegree != 0) {
-						doScroll(mScrollingDegree > 0);
-					}
+					doScroll(mScrollingDegree > 0);
 
 					Log.e("MESSAGE_DO_RECTIFY", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
