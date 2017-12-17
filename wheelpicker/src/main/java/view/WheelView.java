@@ -30,9 +30,6 @@ public class WheelView extends AbsWheelView {
 
 	//半径
 	private int mRadius;
-	//item高度
-	private int mMaxItemHeight;
-	private int mMaxItemWidth;
 
 	//每一个View对应的弯曲角度
 	private HashMap<View, Integer> childrenAngleMap;
@@ -311,7 +308,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillUp(int pos, int nextBottom){
 		int end = getPaddingTop();
-		while (isDegreeVisiable(getDeflectionDegree(pos)) && pos >= 0) {
+		while (isDegreeVisible(getDeflectionDegree(pos)) && pos >= 0) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextBottom, false, getPaddingLeft(), false);
 
@@ -330,7 +327,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillDown(int pos, int nextTop) {
 		int end = (getBottom() - getTop());
-		while (isDegreeVisiable(getDeflectionDegree(pos)) && pos < mItemCount) {
+		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
 
@@ -612,6 +609,9 @@ public class WheelView extends AbsWheelView {
 	 */
 	@Override
 	protected int calculateScrollDegree(float deltaY){
+		if(deltaY == 0){
+			return 0;
+		}
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
 		int d = (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
@@ -621,6 +621,12 @@ public class WheelView extends AbsWheelView {
 			d = (mItemCount - mCurrentItemIndex - 1) * mItemAngle;
 		}
 		return d;
+	}
+
+	@Override
+	protected int calculateScrollArcLength(float degree) {
+		degree %= 360;
+		return (int) (degree * Math.PI * mRadius / 180);
 	}
 
 	public void setSelectItem(int index){
