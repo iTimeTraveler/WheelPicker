@@ -59,6 +59,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected float mLastDownY;
 	protected float mLastMoveY;
 	protected float mLastScrollY;
+	protected float mLastFlingY;
 
 	//总数
 	protected int mItemCount;
@@ -219,10 +220,13 @@ public abstract class AbsWheelView extends ViewGroup {
 			Log.e("gesture", "onDown: " + e.toString());
 			if (isScrollingPerformed) {
 				mLastScrollingDegree = mScrollingDegree;
-				mScrollingDegree = 0;
+//				mScrollingDegree = 0;
+
+//				mLastScrollY = 0;
+//				mLastFlingY = 0;
 				mScroller.forceFinished(true);
 				clearMessages();
-				Log.e("ondown=====", "mScrollingDegree:"+ mScrollingDegree + ", mCurrentItemIndex:"+ mCurrentItemIndex);
+				Log.e("ondown=====", "mScrollingDegree:"+ mScrollingDegree + ", mLastScrollingDegree:"+ mLastScrollingDegree + ", mCurrentItemIndex:"+ mCurrentItemIndex);
 				return true;
 			}
 			return true;
@@ -258,11 +262,11 @@ public abstract class AbsWheelView extends ViewGroup {
 			Log.e("gesture", "onFling: velocityY >>> " + velocityY);
 			Log.e("gesture", "onFling:----------------------------end----------------------------");
 
-			mLastScrollY = 0;
+			mLastFlingY = 0;
 			int startY = calculateScrollArcLength(mScrollingDegree);
-			int minY = -(calculateScrollArcLength(mCurrentItemIndex * mItemAngle + mScrollingDegree));
-			int maxY = calculateScrollArcLength((mItemCount - mCurrentItemIndex - 1) * mItemAngle - mScrollingDegree);
-			Log.e("MESSAGE_DO_FLING=====", "mScrollingDegree:"+ mScrollingDegree + ", startY:"+ startY+ " ,velocityY:" + velocityY + ", minY:"+ minY + ", maxY:"+ maxY);
+			int minY = -(calculateScrollArcLength(mCurrentItemIndex * mItemAngle));
+			int maxY = calculateScrollArcLength((mItemCount - mCurrentItemIndex - 1) * mItemAngle);
+			Log.e("MESSAGE_DO_FLING=====", "mScrollingDegree:"+ mScrollingDegree + ", startY:"+ startY+ " ,velocityY:" + -velocityY + ", minY:"+ minY + ", maxY:"+ maxY);
 			mScroller.fling(0, startY, 0, (int) -velocityY, 0, 0, minY, maxY);
 			sendNextMessage(MESSAGE_DO_FLING);
 			return true;
@@ -318,7 +322,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		if (childCount == 0) {
 			return;
 		}
-		mScrollingDegree = calculateScrollDegree(deltaY) + mLastScrollingDegree;
+		mScrollingDegree = calculateScrollDegree(deltaY, true);
 		final boolean goUp = incrementalDeltaY < 0;
 		doScroll(goUp);
 	}
@@ -328,6 +332,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		if (childCount == 0) {
 			return;
 		}
+		Log.e(TAG, "doScroll() >>> goUp:" + goUp + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 
 		final int firstPosition = mFirstPosition;
 		int start = 0;	//需要回收的起始位置
@@ -389,16 +394,30 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		//滚动角度超过mItemAngle就顺势定位到下一个
 		if(inertia || Math.abs(remainDegree) >= mItemAngle / 2){
-			validCount = (remainDegree >= 0) ? idealCount + 1 : idealCount - 1;
+			idealCount += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? 1 : -1);
 
-			remainDegree += (remainDegree >= 0) ? -mItemAngle : mItemAngle;
+			remainDegree += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? -mItemAngle : mItemAngle);
+		}
+
+		//如果算出来的定位偏移数量越界
+		if(idealCount > (mItemCount - mCurrentItemIndex - 1)){
+			validCount = mItemCount - mCurrentItemIndex - 1;
+			mScrollingDegree = 0;
+		}else if(idealCount < -mCurrentItemIndex){
+			validCount = -mCurrentItemIndex;
+			mScrollingDegree = 0;
 		}else{
-			count = scrollingDegree / mItemAngle;
-		}
-		if(count != 0 && mCurrentItemIndex < mItemCount - 1){
+			validCount = idealCount;
 			mScrollingDegree = remainDegree;
-			mCurrentItemIndex += count;
 		}
+
+		Log.e("rectify before", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+
+		mCurrentItemIndex += validCount;
+
+		Log.e("rectify after", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+
+
 		Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
 		for (StackTraceElement elements : map.get(Thread.currentThread())){
 			Log.e("rectify -- stacks", ""+ elements.toString());
@@ -442,7 +461,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * 根据弧长计算变化的弧度
 	 * @param deltaY
 	 */
-	abstract int calculateScrollDegree(float deltaY);
+	abstract int calculateScrollDegree(float deltaY, boolean addLastDegree);
 
 	abstract int calculateScrollArcLength(float degree);
 
@@ -461,17 +480,17 @@ public abstract class AbsWheelView extends ViewGroup {
 			switch (msg.what){
 				case MESSAGE_DO_FLING:
 
-					int velocityDegree = calculateScrollDegree(mLastScrollY - currY);
-					Log.e("MESSAGE_DO_FLING before", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					int velocityDegree = calculateScrollDegree(mLastFlingY - currY, false);
+					Log.e("MESSAGE_DO_FLING before", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
 					Log.e("MESSAGE_DO_FLING before", "velocityDegree:" + velocityDegree  + ", mCurrentItemIndex:" + mCurrentItemIndex);
 
 					mScrollingDegree += velocityDegree;
-					mLastScrollY = currY;
+					mLastFlingY = currY;
 					if (mScrollingDegree != 0) {
 						doScroll(mScrollingDegree > 0);
 					}
 
-					Log.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					Log.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
 					// scrolling is not finished when it comes to final Y
 					// so, finish it manually
@@ -542,12 +561,15 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * Finishes scrolling
 	 */
 	void finishScrolling() {
+		Log.e(TAG, "finishScrolling() >>> " + mScrollingDegree + ", mLastScrollingDegree:" + mLastScrollingDegree);
 		if (isScrollingPerformed) {
 			isScrollingPerformed = false;
 		}
 		mScrollingDegree = 0;
 		mLastScrollingDegree = 0;
-		invalidate();
+
+		requestLayout();
+		postInvalidate();
 	}
 
 	/**

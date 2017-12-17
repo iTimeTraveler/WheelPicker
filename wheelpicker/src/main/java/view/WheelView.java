@@ -124,6 +124,7 @@ public class WheelView extends AbsWheelView {
 //			fillFromTop(childrenTop);
 //		}else{
 			fillSpecific(mFirstPosition, childrenTop);
+		Log.e("layoutChildren=====", "mScrollingDegree:"+ mScrollingDegree + ",mFirstPosition:" + mFirstPosition);
 //		}
 	}
 
@@ -327,7 +328,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private void fillDown(int pos, int nextTop) {
 		int end = (getBottom() - getTop());
-		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
+		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount - 1) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
 
@@ -608,15 +609,16 @@ public class WheelView extends AbsWheelView {
 	 * @param deltaY
 	 */
 	@Override
-	protected int calculateScrollDegree(float deltaY){
+	protected int calculateScrollDegree(float deltaY, boolean addLastDegree){
 		if(deltaY == 0){
 			return 0;
 		}
 		boolean negative = deltaY < 0;
 		double circumference = 2 * Math.PI * mRadius;
-		int d = (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1);
+		int d = (int) (Math.abs(deltaY) * 360 / circumference) * (negative ? 1 : -1)
+				+ (addLastDegree ? mLastScrollingDegree : 0);
 		if(d < -(mCurrentItemIndex * mItemAngle)){
-			d = -mCurrentItemIndex * mItemAngle;
+			d = -(mCurrentItemIndex * mItemAngle);
 		}else if(d > (mItemCount - mCurrentItemIndex - 1) * mItemAngle){
 			d = (mItemCount - mCurrentItemIndex - 1) * mItemAngle;
 		}
