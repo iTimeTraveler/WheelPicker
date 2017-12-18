@@ -5,9 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.Region;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -32,6 +35,8 @@ public class WheelView extends AbsWheelView {
 	private int mRadius;
 
 	private Paint mIndicatorPaint;
+	private Paint mDustPaint;
+	private LinearGradient mLinearGradient;
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
@@ -68,6 +73,12 @@ public class WheelView extends AbsWheelView {
 		mIndicatorPaint = new Paint();
 		mIndicatorPaint.setColor(Color.parseColor("#FFd5d5d5"));
 		mIndicatorPaint.setAntiAlias(true);
+
+		int[] colors = {0x99FFFFFF,0x88FFFFFF,0x66FFFFFF,0x22FFFFFF,0x00FFFFFF};
+		float[]  pos = {0f,0.2f,0.4f,0.6f,1.0f};
+		mLinearGradient = new LinearGradient(getWidth()/2, 0, getWidth()/2, (getHeight() - mMaxItemHeight)/2, colors, pos, Shader.TileMode.CLAMP);
+		mDustPaint = new Paint();
+		mDustPaint.setShader(mLinearGradient);
 	}
 
 	@Override
@@ -91,7 +102,6 @@ public class WheelView extends AbsWheelView {
 		}else if(heightMode == MeasureSpec.AT_MOST){
 			heightSize = diameter;
 		}
-
 
 		mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
 		if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED
@@ -129,6 +139,7 @@ public class WheelView extends AbsWheelView {
 //			fillFromTop(childrenTop);
 //		}else{
 			fillSpecific(mFirstPosition, childrenTop);
+		initPaints();
 		Log.e("layoutChildren=====", "mScrollingDegree:"+ mScrollingDegree + ",mFirstPosition:" + mFirstPosition);
 //		}
 	}
@@ -146,12 +157,16 @@ public class WheelView extends AbsWheelView {
 
 				int degree = (mCurrentItemIndex - position) * mItemAngle + mScrollingDegree;
 				drawItem(canvas, itemView, position, degree);
+				drawIndicatorItem(canvas, itemView, position, degree);
 			}
 		}
 
 		//绘制中间两条横线
 		canvas.drawLine(0, (getHeight() - mMaxItemHeight) / 2, getWidth(),  (getHeight() - mMaxItemHeight) / 2, mIndicatorPaint);
 		canvas.drawLine(0, (getHeight() + mMaxItemHeight) / 2, getWidth(),  (getHeight() + mMaxItemHeight) / 2, mIndicatorPaint);
+
+		//蒙灰
+		canvas.drawRect(0, 0, getWidth(), (getHeight() - mMaxItemHeight) / 2, mDustPaint);
 
 		//辅助线
 		if(DRAW_AUXILIARY_LINE){
@@ -486,12 +501,14 @@ public class WheelView extends AbsWheelView {
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
 			mCamera.restore();
+			mMatrix.preScale(0.9F, 0.9F, - bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			//使用pre将旋转中心移动到和Camera位置相同。
 			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			// 使用post将图片(View)移动到原来的位置
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
 
 			canvas.save();
+			canvas.clipRect(0, (getHeight() - mMaxItemHeight) / 2, getWidth(), (getHeight() + mMaxItemHeight) / 2, Region.Op.DIFFERENCE);
 			canvas.translate(offsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
@@ -519,6 +536,42 @@ public class WheelView extends AbsWheelView {
 		}
 
 		return height;
+	}
+
+	/**
+	 * 绘制选中放大区域
+	 */
+	private void drawIndicatorItem(Canvas canvas, View itemView, int position, int degree){
+		if(degree >= mItemAngle || degree <= -mItemAngle){
+			return;
+		}
+		Bitmap bmp = convertViewToBitmap(itemView);
+		int offsetX = getPaddingLeft();
+		int offsetZ = calculateItemOffsetZ(degree);
+		float offsetY = calculateItemOffsetY(degree);
+
+		if(bmp != null){
+			mMatrix.reset();
+			mCamera.save();
+			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
+			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), mCamera.getLocationZ() + offsetZ);
+			//绕X轴翻转
+			mCamera.rotateX(degree);
+			mCamera.getMatrix(mMatrix);
+			mCamera.restore();
+			//使用pre将旋转中心移动到和Camera位置相同。
+			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
+			// 使用post将图片(View)移动到原来的位置
+			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
+
+			canvas.save();
+			canvas.clipRect(0, (getHeight() - mMaxItemHeight) / 2, getWidth(), (getHeight() + mMaxItemHeight) / 2);
+			canvas.translate(offsetX, offsetY);
+			canvas.drawBitmap(bmp, mMatrix, null);
+			//设置图片抗锯齿
+			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+			canvas.restore();
+		}
 	}
 
 	/**
