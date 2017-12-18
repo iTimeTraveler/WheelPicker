@@ -60,18 +60,26 @@ public class WheelView extends AbsWheelView {
 	 */
 	public WheelView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		initData(context);
+		initWheelView();
 	}
 
-	private void initData(Context context){
+	private void initWheelView(){
 		mItemAngle = 180 / (SHOW_COUNT - 1);
+
+		/* ViewGroup doesn't draw by default
+		 *
+		 * Typically, if you override {@link #onDraw(android.graphics.Canvas)}
+		 *  you should clear this flag.
+		 */
+		Log.e("initWheelView=", "mFirstPosition:"+ mFirstPosition + ", willNotDraw:" + willNotDraw());
+		setWillNotDraw(false);
 		setSelectItem(0);
 		initPaints();
 	}
 
 	private void initPaints() {
 		mIndicatorPaint = new Paint();
-		mIndicatorPaint.setColor(Color.parseColor("#FFd5d5d5"));
+		mIndicatorPaint.setColor(Color.parseColor("#C8C7CC"));
 		mIndicatorPaint.setAntiAlias(true);
 
 		int[] colors = {0x99FFFFFF,0x88FFFFFF,0x66FFFFFF,0x22FFFFFF,0x00FFFFFF};
@@ -132,16 +140,8 @@ public class WheelView extends AbsWheelView {
 
 		// Clear out old views
 		detachAllViewsFromParent();
-
-		final int childrenTop = getPaddingTop();
-		final int childCount = getChildCount();
-//		if (childCount == 0) {
-//			fillFromTop(childrenTop);
-//		}else{
-			fillSpecific(mFirstPosition, childrenTop);
+		fillSpecific(mFirstPosition, getPaddingTop());
 		initPaints();
-		Log.e("layoutChildren=====", "mScrollingDegree:"+ mScrollingDegree + ",mFirstPosition:" + mFirstPosition);
-//		}
 	}
 
 	@Override
@@ -155,9 +155,14 @@ public class WheelView extends AbsWheelView {
 				View itemView = getChildAt(i);
 				final int position = firstPos + i;
 
+				//指示器内的view需要设置select状态，所以不能使用drawingCache得到位图
+				boolean destroyDrawingCache = false;
 				int degree = (mCurrentItemIndex - position) * mItemAngle + mScrollingDegree;
-				drawItem(canvas, itemView, position, degree);
-				drawIndicatorItem(canvas, itemView, position, degree);
+				if(degree < mItemAngle && degree > -mItemAngle){
+					destroyDrawingCache = true;
+					drawIndicatorItem(canvas, itemView, position, degree, true);
+				}
+				drawItem(canvas, itemView, position, degree, destroyDrawingCache);
 			}
 		}
 
@@ -176,8 +181,13 @@ public class WheelView extends AbsWheelView {
 		}
 	}
 
+	/**
+	 * Don't need to draw child views here,
+	 * they have been drawn on {@link #draw(Canvas)}
+	 */
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
+		return;
 	}
 
 	@Override
@@ -479,8 +489,8 @@ public class WheelView extends AbsWheelView {
 	/**
 	 * 绘制单个item
 	 */
-	private int drawItem(Canvas canvas, View itemView, int position, int degree){
-		Bitmap bmp = convertViewToBitmap(itemView);
+	private int drawItem(Canvas canvas, View itemView, int position, int degree, boolean destoryDrawingCache){
+		Bitmap bmp = convertViewToBitmap(itemView, destoryDrawingCache);
 		int offsetX = getPaddingLeft();
 		int offsetZ = calculateItemOffsetZ(degree);
 		float offsetY = calculateItemOffsetY(degree);
@@ -541,11 +551,13 @@ public class WheelView extends AbsWheelView {
 	/**
 	 * 绘制选中放大区域
 	 */
-	private void drawIndicatorItem(Canvas canvas, View itemView, int position, int degree){
+	private void drawIndicatorItem(Canvas canvas, View itemView, int position, int degree, boolean destoryDrawingCache){
 		if(degree >= mItemAngle || degree <= -mItemAngle){
 			return;
 		}
-		Bitmap bmp = convertViewToBitmap(itemView);
+		itemView.setSelected(true);
+		Bitmap bmp = convertViewToBitmap(itemView, destoryDrawingCache);
+		itemView.setSelected(false);
 		int offsetX = getPaddingLeft();
 		int offsetZ = calculateItemOffsetZ(degree);
 		float offsetY = calculateItemOffsetY(degree);
@@ -597,7 +609,10 @@ public class WheelView extends AbsWheelView {
 	 * View转换为Bitmap
 	 * @param view
 	 */
-	private Bitmap convertViewToBitmap(View view){
+	private Bitmap convertViewToBitmap(View view, boolean destoryCache){
+		if(destoryCache){
+			view.destroyDrawingCache();
+		}
 		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
 		view.buildDrawingCache();

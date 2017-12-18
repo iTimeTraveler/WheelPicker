@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
@@ -120,7 +119,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		// 获取TouchSlop值
 		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
-		mScroller = new Scroller(context, new DecelerateInterpolator());
+		mScroller = new Scroller(context);
 		mGestureDetector = new GestureDetector(context, mSimpleOnGestureListener);
 		mGestureDetector.setIsLongpressEnabled(false);
 	}
@@ -428,9 +427,9 @@ public abstract class AbsWheelView extends ViewGroup {
 		//使用动画滚动到选中位置
 		if (Math.abs(mScrollingDegree) > MIN_DELTA_FOR_SCROLLING) {
 			mLastScrollY = 0;
-			int duration = (int) Math.min(RECTIFY_ANIM_DURATION, Math.max(RECTIFY_ANIM_DURATION*0.3, Math.abs(RECTIFY_ANIM_DURATION * mScrollingDegree * 1.0F / mItemAngle)));
-			mScroller.startScroll(0, 0, 0, mScrollingDegree, duration);
-			Log.e("rectify", "duration =" + duration + ", mScrollingDegree:" + mScrollingDegree);
+			int duration = (int) Math.max(100, Math.abs(RECTIFY_ANIM_DURATION * mScrollingDegree * 1.0F / mItemAngle));
+			mScroller.startScroll(0, 0, 0, mScrollingDegree, RECTIFY_ANIM_DURATION);
+			Log.e("MESSAGE_DO_RECTIFY", "duration =" + duration);
 			sendNextMessage(MESSAGE_DO_RECTIFY);
 		} else {
 			finishScrolling();
@@ -492,7 +491,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					// scrolling is not finished when it comes to final Y
 					// so, finish it manually
-					if (Math.abs(velocityDegree) < MIN_DELTA_FOR_SCROLLING) {
+					if (Math.abs(velocityDegree) <= MIN_DELTA_FOR_SCROLLING) {
 						mScroller.forceFinished(true);
 					}
 					if (!mScroller.isFinished()) {
