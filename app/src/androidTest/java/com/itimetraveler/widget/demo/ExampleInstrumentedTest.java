@@ -1,4 +1,4 @@
-package com.itimetraveler.widget.wheelpickerapp;
+package com.itimetraveler.widget.demo;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

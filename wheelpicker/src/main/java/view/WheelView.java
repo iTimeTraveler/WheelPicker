@@ -14,8 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
-
 import adapter.WheelAdapter;
 
 /**
@@ -32,6 +30,8 @@ public class WheelView extends AbsWheelView {
 
 	//半径
 	private int mRadius;
+
+	private Paint mIndicatorPaint;
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
@@ -61,6 +61,13 @@ public class WheelView extends AbsWheelView {
 	private void initData(Context context){
 		mItemAngle = 180 / (SHOW_COUNT - 1);
 		setSelectItem(0);
+		initPaints();
+	}
+
+	private void initPaints() {
+		mIndicatorPaint = new Paint();
+		mIndicatorPaint.setColor(Color.parseColor("#FFd5d5d5"));
+		mIndicatorPaint.setAntiAlias(true);
 	}
 
 	@Override
@@ -141,6 +148,10 @@ public class WheelView extends AbsWheelView {
 				drawItem(canvas, itemView, position, degree);
 			}
 		}
+
+		//绘制中间两条横线
+		canvas.drawLine(0, (getHeight() - mMaxItemHeight) / 2, getWidth(),  (getHeight() - mMaxItemHeight) / 2, mIndicatorPaint);
+		canvas.drawLine(0, (getHeight() + mMaxItemHeight) / 2, getWidth(),  (getHeight() + mMaxItemHeight) / 2, mIndicatorPaint);
 
 		//辅助线
 		if(DRAW_AUXILIARY_LINE){
@@ -309,7 +320,6 @@ public class WheelView extends AbsWheelView {
 	 *        with pos should be drawn
 	 */
 	private void fillUp(int pos, int nextBottom){
-		int end = getPaddingTop();
 		while (isDegreeVisible(getDeflectionDegree(pos)) && pos >= 0) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextBottom, false, getPaddingLeft(), false);
@@ -328,7 +338,6 @@ public class WheelView extends AbsWheelView {
 	 *        should be drawn
 	 */
 	private void fillDown(int pos, int nextTop) {
-		int end = (getBottom() - getTop());
 		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
