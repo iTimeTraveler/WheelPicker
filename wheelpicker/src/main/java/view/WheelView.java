@@ -86,7 +86,7 @@ public class WheelView extends AbsWheelView {
 		mIndicatorPaint.setColor(Color.parseColor("#C8C7CC"));
 		mIndicatorPaint.setAntiAlias(true);
 
-		float[] pos = new float[18];
+		float[] pos = new float[23];
 		int[] x = getCircularGradientArray(0xEE, 0xFFFFFF, pos);
 		mAboveGradient = new LinearGradient(getWidth()/2, getPaddingTop(), getWidth()/2, (getHeight() - mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mBelowGradient = new LinearGradient(getWidth()/2, getHeight() - getPaddingBottom(), getWidth()/2, (getHeight() + mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
