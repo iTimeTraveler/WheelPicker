@@ -2,6 +2,7 @@ package view;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -88,8 +89,8 @@ public class TextWheelPicker extends WheelView {
 				RelativeLayout root = new RelativeLayout(mContext);
 				root.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 				TextView tv = new TextView(mContext);
-				tv.setPadding(20, 5, 20, 5);
-				tv.setTextSize(20);
+				tv.setPadding(20, 3, 20, 3);
+				tv.setTextSize(23);
 
 				//选中颜色
 				int[] colors = new int[] {0xFF333333, 0xFFAAAAAA};

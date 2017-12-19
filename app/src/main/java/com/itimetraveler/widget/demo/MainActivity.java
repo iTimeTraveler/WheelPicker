@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<String> mList = new ArrayList<String>();
         for (int i = 0; i <= 50; i++){
-            mList.add("ok-" + i);
+            mList.add("" + i + "月" + i + "日 周四");
         }
         mTextWheelPicker = (TextWheelPicker) findViewById(R.id.text_wheel_picker);
         mTextWheelPicker.setTextList(mList);

@@ -43,8 +43,12 @@ public class WheelView extends AbsWheelView {
 
 	//是否绘制辅助线
 	private static final boolean DRAW_AUXILIARY_LINE = false;
+
 	//指示器外侧元素缩放级别
-	private static final float OUTER_ITEM_SCALE = 0.95F;
+	private static final float OUTER_ITEM_SCALE = 0.90F;
+
+	//Camera远近
+	private static final float CAMERA_LOCATION_Z = 10;
 
 	/**
 	 * Constructor
@@ -86,8 +90,8 @@ public class WheelView extends AbsWheelView {
 		mIndicatorPaint.setColor(Color.parseColor("#C8C7CC"));
 		mIndicatorPaint.setAntiAlias(true);
 
-		float[] pos = new float[23];
-		int[] x = getCircularGradientArray(0xEE, 0xFFFFFF, pos);
+		float[] pos = new float[19];
+		int[] x = getCircularGradientArray(0xAA, 0xFFFFFF, pos);
 		mAboveGradient = new LinearGradient(getWidth()/2, getPaddingTop(), getWidth()/2, (getHeight() - mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mBelowGradient = new LinearGradient(getWidth()/2, getHeight() - getPaddingBottom(), getWidth()/2, (getHeight() + mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mDustPaint = new Paint();
@@ -133,12 +137,12 @@ public class WheelView extends AbsWheelView {
 
 		//适配wrap_content
 		if(widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST){
-			widthSize = mMaxItemWidth;
-			heightSize = diameter;
+			widthSize = mMaxItemWidth + getPaddingLeft() + getPaddingRight();
+			heightSize = diameter + getPaddingTop() + getPaddingBottom();
 		}else if(widthMode == MeasureSpec.AT_MOST){
-			widthSize = mMaxItemWidth;
+			widthSize = mMaxItemWidth + getPaddingLeft() + getPaddingRight();
 		}else if(heightMode == MeasureSpec.AT_MOST){
-			heightSize = diameter;
+			heightSize = diameter + getPaddingTop() + getPaddingBottom();
 		}
 
 		mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
@@ -156,8 +160,7 @@ public class WheelView extends AbsWheelView {
 		// TODO: after first layout we should maybe start at the first visible position, not 0
 		measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
 
-		setMeasuredDimension(widthSize + getPaddingLeft() + getPaddingRight(),
-				heightSize + getPaddingTop() + getPaddingBottom());
+		setMeasuredDimension(widthSize, heightSize);
 	}
 
 	@Override
@@ -178,6 +181,7 @@ public class WheelView extends AbsWheelView {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
+		final int h = getHeight() - getPaddingTop() - getPaddingBottom();
 		final int firstPos = mFirstPosition;
 		if(mAdapter != null){
 			int count = getChildCount();
@@ -197,14 +201,14 @@ public class WheelView extends AbsWheelView {
 		}
 
 		//绘制中间两条横线
-		canvas.drawLine(0, (getHeight() - mMaxItemHeight) / 2, getWidth(),  (getHeight() - mMaxItemHeight) / 2, mIndicatorPaint);
-		canvas.drawLine(0, (getHeight() + mMaxItemHeight) / 2, getWidth(),  (getHeight() + mMaxItemHeight) / 2, mIndicatorPaint);
+		canvas.drawLine(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(),  ((h - mMaxItemHeight) >> 1) + getPaddingTop(), mIndicatorPaint);
+		canvas.drawLine(0, ((h + mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(),  ((h + mMaxItemHeight) >> 1) + getPaddingTop(), mIndicatorPaint);
 
 		//蒙灰
 		mDustPaint.setShader(mAboveGradient);
-		canvas.drawRect(0, getPaddingTop(), getWidth(), (getHeight() - mMaxItemHeight) / 2, mDustPaint);
+		canvas.drawRect(0, getPaddingTop(), getWidth(), ((h - mMaxItemHeight) >> 1) + getPaddingTop(), mDustPaint);
 		mDustPaint.setShader(mBelowGradient);
-		canvas.drawRect(0, (getHeight() + mMaxItemHeight) / 2, getWidth(), getHeight() - getPaddingBottom(), mDustPaint);
+		canvas.drawRect(0, ((h + mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), getHeight() - getPaddingBottom(), mDustPaint);
 
 		//辅助线
 		if(DRAW_AUXILIARY_LINE){
@@ -524,19 +528,20 @@ public class WheelView extends AbsWheelView {
 	 */
 	private int drawItem(Canvas canvas, View itemView, int position, int degree, boolean destoryDrawingCache){
 		Bitmap bmp = convertViewToBitmap(itemView, destoryDrawingCache);
-		int offsetX = getPaddingLeft();
+		int w = getWidth() - getPaddingLeft() - getPaddingRight();
+		int h = getHeight() - getPaddingTop() - getPaddingBottom();
 		int offsetZ = calculateItemOffsetZ(degree);
 		float offsetY = calculateItemOffsetY(degree);
 		int height = 0;
 
 		if(bmp != null){
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
-			offsetX += (mMaxItemWidth - bmp.getWidth() * OUTER_ITEM_SCALE) / 2;
+			int offsetX = ((w - (int)(bmp.getWidth() * OUTER_ITEM_SCALE)) >> 1) + getPaddingLeft();
 
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
-			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), mCamera.getLocationZ() + offsetZ);
+			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -548,7 +553,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
 
 			canvas.save();
-			canvas.clipRect(0, (getHeight() - mMaxItemHeight) / 2, getWidth(), (getHeight() + mMaxItemHeight) / 2, Region.Op.DIFFERENCE);
+			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop(), Region.Op.DIFFERENCE);
 			canvas.translate(offsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
@@ -588,17 +593,18 @@ public class WheelView extends AbsWheelView {
 		itemView.setSelected(true);
 		Bitmap bmp = convertViewToBitmap(itemView, destoryDrawingCache);
 		itemView.setSelected(false);
-		int offsetX = getPaddingLeft();
+		int w = getWidth() - getPaddingLeft() - getPaddingRight();
+		int h = getHeight() - getPaddingTop() - getPaddingBottom();
 		int offsetZ = calculateItemOffsetZ(degree);
 		float offsetY = calculateItemOffsetY(degree);
 
 		if(bmp != null){
-			offsetX += (mMaxItemWidth - bmp.getWidth()) / 2;
+			int offsetX = ((w - bmp.getWidth()) >> 1) + getPaddingLeft();
 
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
-			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), mCamera.getLocationZ() + offsetZ);
+			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -609,7 +615,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
 
 			canvas.save();
-			canvas.clipRect(0, (getHeight() - mMaxItemHeight) / 2, getWidth(), (getHeight() + mMaxItemHeight) / 2);
+			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop());
 			canvas.translate(offsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
