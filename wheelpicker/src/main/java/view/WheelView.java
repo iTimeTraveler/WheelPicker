@@ -533,10 +533,6 @@ public class WheelView extends AbsWheelView {
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
 			offsetX += (mMaxItemWidth - bmp.getWidth() * OUTER_ITEM_SCALE) / 2;
 
-			Log.v(TAG, "position:" + position + ", degree:" + degree + ", offsetY:" + offsetY);
-			Log.v(TAG, "position:" + position + ", mRadius:" + (mRadius) + ", offsetY-mRadius:" + (offsetY - mRadius));
-			Log.v(TAG, ".");
-
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近

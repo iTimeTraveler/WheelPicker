@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 
 /**
- * Created by xuewenlong on 2017/12/9.
+ * Created by iTimeTraveler on 2017/12/9.
  */
 public abstract class WheelAdapter implements Adapter {
 	private DataSetObservable dataSetObservable = new DataSetObservable();
