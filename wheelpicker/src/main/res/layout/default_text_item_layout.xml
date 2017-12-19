@@ -15,7 +15,7 @@
         android:id="@+id/default_text_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:padding="5dp"
         android:textSize="20sp"
         android:textColor="@color/default_text_color_selector"
         android:text="wheelpicker"/>

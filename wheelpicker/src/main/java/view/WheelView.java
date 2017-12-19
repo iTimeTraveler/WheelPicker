@@ -71,7 +71,6 @@ public class WheelView extends AbsWheelView {
 		 * Typically, if you override {@link #onDraw(android.graphics.Canvas)}
 		 *  you should clear this flag.
 		 */
-		Log.e("initWheelView=", "mFirstPosition:"+ mFirstPosition + ", willNotDraw:" + willNotDraw());
 		setWillNotDraw(false);
 		setSelectItem(0);
 		initPaints();
@@ -498,6 +497,7 @@ public class WheelView extends AbsWheelView {
 
 		if(bmp != null){
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
+			offsetX += (mMaxItemWidth - bmp.getWidth() * 0.9F) / 2;
 
 			Log.v(TAG, "position:" + position + ", degree:" + degree + ", offsetY:" + offsetY);
 			Log.v(TAG, "position:" + position + ", mRadius:" + (mRadius) + ", offsetY-mRadius:" + (offsetY - mRadius));
@@ -563,6 +563,8 @@ public class WheelView extends AbsWheelView {
 		float offsetY = calculateItemOffsetY(degree);
 
 		if(bmp != null){
+			offsetX += (mMaxItemWidth - bmp.getWidth()) / 2;
+
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
