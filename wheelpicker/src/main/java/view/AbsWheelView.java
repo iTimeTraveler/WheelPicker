@@ -75,6 +75,11 @@ public abstract class AbsWheelView extends ViewGroup {
 	private GestureDetector mGestureDetector;
 
 	/**
+	 * Optional callback to notify client when select position has changed
+	 */
+	private AbsWheelView.OnItemSelectedListener mOnItemSelectedListener;
+
+	/**
 	 * The adapter containing the data to be displayed by this view
 	 */
 	protected WheelAdapter mAdapter;
@@ -102,6 +107,19 @@ public abstract class AbsWheelView extends ViewGroup {
 	 */
 	final RecycleBin mRecycler = new RecycleBin();
 
+	/**
+	 * Interface definition for a callback to be invoked when the wheel view's item
+	 * has been selected.
+	 */
+	public interface OnItemSelectedListener {
+
+		/**
+		 * Callback method to be invoked while the wheel view's item is being selected.
+		 * @param parentView
+		 * @param index
+		 */
+		public void onItemSelected(AbsWheelView parentView, int index);
+	}
 
 	public AbsWheelView(Context context) {
 		this(context, null);
@@ -140,6 +158,16 @@ public abstract class AbsWheelView extends ViewGroup {
 		invalidate();
 	}
 
+
+	/**
+	 * Set the listener that will receive notifications when the wheel view
+	 * finishes scrolling and select an option automatically.
+	 * @param l the item selected listener
+	 */
+	public void setOnItemSelectedListener(AbsWheelView.OnItemSelectedListener l) {
+		mOnItemSelectedListener = l;
+	}
+
 	/**
 	 * Set the the specified scrolling interpolator
 	 * @param interpolator the interpolator
@@ -147,6 +175,15 @@ public abstract class AbsWheelView extends ViewGroup {
 	public void setInterpolator(Interpolator interpolator) {
 		mScroller.forceFinished(true);
 		mScroller = new Scroller(getContext(), interpolator);
+	}
+
+	/**
+	 * Notify our item selected listener (if there is one) of a change after finishing scrolling.
+	 */
+	private void invokeOnItemScrollListener() {
+		if (mOnItemSelectedListener != null) {
+			mOnItemSelectedListener.onItemSelected(this, mCurrentItemIndex);
+		}
 	}
 
 	@Override
@@ -221,10 +258,6 @@ public abstract class AbsWheelView extends ViewGroup {
 			Log.e("gesture", "onDown: " + e.toString());
 			if (isScrollingPerformed) {
 				mLastScrollingDegree = mScrollingDegree;
-//				mScrollingDegree = 0;
-
-//				mLastScrollY = 0;
-//				mLastFlingY = 0;
 				mScroller.forceFinished(true);
 				clearMessages();
 				Log.e("ondown=====", "mScrollingDegree:"+ mScrollingDegree + ", mLastScrollingDegree:"+ mLastScrollingDegree + ", mCurrentItemIndex:"+ mCurrentItemIndex);
@@ -328,6 +361,10 @@ public abstract class AbsWheelView extends ViewGroup {
 		doScroll(goUp);
 	}
 
+	/**
+	 * 滚动时使用回收策略复用View
+	 * @param goUp 是否是向上滚动
+	 */
 	private void doScroll(boolean goUp){
 		final int childCount = getChildCount();
 		if (childCount == 0) {
@@ -567,6 +604,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		requestLayout();
 		postInvalidate();
+		invokeOnItemScrollListener();
 	}
 
 	/**
