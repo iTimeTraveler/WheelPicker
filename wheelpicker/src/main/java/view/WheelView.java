@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Arrays;
+
 import adapter.WheelAdapter;
 
 /**
@@ -28,18 +30,21 @@ public class WheelView extends AbsWheelView {
 	private static final int SHOW_COUNT = 11;
 	private static final int NO_POSITION = -1;
 
-	//是否绘制辅助线
-	private static final boolean DRAW_AUXILIARY_LINE = false;
-
 	//半径
 	private int mRadius;
 
 	private Paint mIndicatorPaint;
 	private Paint mDustPaint;
-	private LinearGradient mLinearGradient;
+	private LinearGradient mAboveGradient;
+	private LinearGradient mBelowGradient;
 
 	private Camera mCamera = new Camera();
 	private Matrix mMatrix = new Matrix();
+
+	//是否绘制辅助线
+	private static final boolean DRAW_AUXILIARY_LINE = false;
+	//指示器外侧元素缩放级别
+	private static final float OUTER_ITEM_SCALE = 0.95F;
 
 	/**
 	 * Constructor
@@ -81,11 +86,37 @@ public class WheelView extends AbsWheelView {
 		mIndicatorPaint.setColor(Color.parseColor("#C8C7CC"));
 		mIndicatorPaint.setAntiAlias(true);
 
-		int[] colors = {0x99FFFFFF,0x88FFFFFF,0x66FFFFFF,0x22FFFFFF,0x00FFFFFF};
-		float[]  pos = {0f,0.2f,0.4f,0.6f,1.0f};
-		mLinearGradient = new LinearGradient(getWidth()/2, 0, getWidth()/2, (getHeight() - mMaxItemHeight)/2, colors, pos, Shader.TileMode.CLAMP);
+		float[] pos = new float[18];
+		int[] x = getCircularGradientArray(0xEE, 0xFFFFFF, pos);
+		mAboveGradient = new LinearGradient(getWidth()/2, getPaddingTop(), getWidth()/2, (getHeight() - mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
+		mBelowGradient = new LinearGradient(getWidth()/2, getHeight() - getPaddingBottom(), getWidth()/2, (getHeight() + mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mDustPaint = new Paint();
-		mDustPaint.setShader(mLinearGradient);
+	}
+
+	/**
+	 * 生成渐变色值组
+	 * @param concentrate 起始点透明度
+	 * @param background  遮罩颜色
+	 * @param pos  锚点数组
+	 * @return   colors数组
+	 */
+	private int[] getCircularGradientArray(int concentrate, int background, float[] pos){
+		if(pos == null || pos.length < 10){
+			pos = new float[10];
+		}
+		concentrate %= 256;
+		int[] covers = new int[pos.length];
+		for(int i = 0; i < pos.length; i++){
+			pos[i] = ((float)(i)) / pos.length;
+
+			//sin²x + cos²x = 1
+			//cos x = Math.sqrt(1-sin²x)
+			int dilute = (int) (concentrate * Math.sqrt(1 - Math.pow((0.1 * i), 2)));
+			Log.d("getCircularGradient", "dilute:  " + dilute + ", " + Integer.toHexString(dilute));
+			covers[i] = (dilute << 24) | background;
+		}
+		Log.d("getCircularGradient", "covers:  " + Arrays.toString(covers) + ". pos:  "+Arrays.toString(pos));
+		return covers;
 	}
 
 	@Override
@@ -170,7 +201,10 @@ public class WheelView extends AbsWheelView {
 		canvas.drawLine(0, (getHeight() + mMaxItemHeight) / 2, getWidth(),  (getHeight() + mMaxItemHeight) / 2, mIndicatorPaint);
 
 		//蒙灰
-		canvas.drawRect(0, 0, getWidth(), (getHeight() - mMaxItemHeight) / 2, mDustPaint);
+		mDustPaint.setShader(mAboveGradient);
+		canvas.drawRect(0, getPaddingTop(), getWidth(), (getHeight() - mMaxItemHeight) / 2, mDustPaint);
+		mDustPaint.setShader(mBelowGradient);
+		canvas.drawRect(0, (getHeight() + mMaxItemHeight) / 2, getWidth(), getHeight() - getPaddingBottom(), mDustPaint);
 
 		//辅助线
 		if(DRAW_AUXILIARY_LINE){
@@ -497,7 +531,7 @@ public class WheelView extends AbsWheelView {
 
 		if(bmp != null){
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
-			offsetX += (mMaxItemWidth - bmp.getWidth() * 0.9F) / 2;
+			offsetX += (mMaxItemWidth - bmp.getWidth() * OUTER_ITEM_SCALE) / 2;
 
 			Log.v(TAG, "position:" + position + ", degree:" + degree + ", offsetY:" + offsetY);
 			Log.v(TAG, "position:" + position + ", mRadius:" + (mRadius) + ", offsetY-mRadius:" + (offsetY - mRadius));
@@ -511,7 +545,7 @@ public class WheelView extends AbsWheelView {
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
 			mCamera.restore();
-			mMatrix.preScale(0.9F, 0.9F, - bmp.getWidth() / 2, - bmp.getHeight() / 2);
+			mMatrix.preScale(OUTER_ITEM_SCALE, OUTER_ITEM_SCALE, - bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			//使用pre将旋转中心移动到和Camera位置相同。
 			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			// 使用post将图片(View)移动到原来的位置
