@@ -4,22 +4,30 @@ import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
+import android.widget.BaseAdapter;
 
 /**
  * Created by iTimeTraveler on 2017/12/9.
  */
-public abstract class WheelAdapter implements Adapter {
-	private DataSetObservable dataSetObservable = new DataSetObservable();
+public abstract class WheelAdapter extends BaseAdapter {
+	private DataSetObservable mDataSetObservable = new DataSetObservable();
 
 	@Override
 	public void registerDataSetObserver(DataSetObserver observer) {
-		dataSetObservable.registerObserver(observer);
+		mDataSetObservable.registerObserver(observer);
 	}
 
 	@Override
 	public void unregisterDataSetObserver(DataSetObserver observer) {
-		dataSetObservable.unregisterObserver(observer);
+		mDataSetObservable.unregisterObserver(observer);
+	}
+
+	/**
+	 * Notifies the attached observers that the underlying data has been changed
+	 * and any View reflecting the data set should refresh itself.
+	 */
+	public void notifyDataSetChanged() {
+		mDataSetObservable.notifyChanged();
 	}
 
 	@Override
@@ -45,5 +53,10 @@ public abstract class WheelAdapter implements Adapter {
 	@Override
 	public boolean isEmpty() {
 		return getCount() == 0;
+	}
+
+	@Override
+	public CharSequence[] getAutofillOptions() {
+		return new CharSequence[0];
 	}
 }

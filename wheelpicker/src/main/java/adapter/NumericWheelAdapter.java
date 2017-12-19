@@ -82,7 +82,6 @@ public class NumericWheelAdapter extends WheelAdapter {
 		return convertView;
 	}
 
-
 	private static class ViewHolder{
 		TextView textView;
 	}

@@ -151,6 +151,8 @@ public abstract class AbsWheelView extends ViewGroup {
 		if(mAdapter != null && mDataSetObserver != null){
 			mAdapter.unregisterDataSetObserver(mDataSetObserver);
 		}
+		mRecycler.clear();
+
 		mAdapter = adapter;
 		mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
 
@@ -779,6 +781,29 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		public boolean shouldRecycleViewType(int viewType) {
 			return viewType >= 0;
+		}
+
+		/**
+		 * Clears the scrap heap.
+		 */
+		void clear() {
+			if (mViewTypeCount == 1) {
+				final ArrayList<View> scrap = mCurrentScrap;
+				clearScrap(scrap);
+			} else {
+				final int typeCount = mViewTypeCount;
+				for (int i = 0; i < typeCount; i++) {
+					final ArrayList<View> scrap = mScrapViews[i];
+					clearScrap(scrap);
+				}
+			}
+		}
+
+		private void clearScrap(final ArrayList<View> scrap) {
+			final int scrapCount = scrap.size();
+			for (int j = 0; j < scrapCount; j++) {
+				removeDetachedView(scrap.remove(scrapCount - 1 - j), false);
+			}
 		}
 	}
 
