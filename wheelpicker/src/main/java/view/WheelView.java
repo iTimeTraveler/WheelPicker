@@ -17,8 +17,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Arrays;
-
 import adapter.WheelAdapter;
 
 /**
@@ -116,10 +114,8 @@ public class WheelView extends AbsWheelView {
 			//sin²x + cos²x = 1
 			//cos x = Math.sqrt(1-sin²x)
 			int dilute = (int) (concentrate * Math.sqrt(1 - Math.pow((0.1 * i), 2)));
-			Log.d("getCircularGradient", "dilute:  " + dilute + ", " + Integer.toHexString(dilute));
 			covers[i] = (dilute << 24) | background;
 		}
-		Log.d("getCircularGradient", "covers:  " + Arrays.toString(covers) + ". pos:  "+Arrays.toString(pos));
 		return covers;
 	}
 
@@ -676,7 +672,6 @@ public class WheelView extends AbsWheelView {
 		if(degree < 0){
 			offsetY -= mMaxItemHeight;
 		}
-		Log.e("calculateItemOffsetY", "degree:"+ degree+"...offsetAngle:" + offsetAngle  + ", offsetRadians:" + offsetRadians + ", offsetY:"+ offsetY);
 		return (float) offsetY + getPaddingTop();
 	}
 
@@ -736,7 +731,6 @@ public class WheelView extends AbsWheelView {
 
 	@Override
 	protected int calculateScrollArcLength(float degree) {
-		degree %= 360;
 		return (int) (degree * Math.PI * mRadius / 180);
 	}
 
