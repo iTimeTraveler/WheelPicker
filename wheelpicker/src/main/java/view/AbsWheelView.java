@@ -116,9 +116,9 @@ public abstract class AbsWheelView extends ViewGroup {
 		/**
 		 * Callback method to be invoked while the wheel view's item is being selected.
 		 * @param parentView
-		 * @param index
+		 * @param position
 		 */
-		public void onItemSelected(AbsWheelView parentView, int index);
+		public void onItemSelected(AbsWheelView parentView, int position);
 	}
 
 	public AbsWheelView(Context context) {
@@ -182,7 +182,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	/**
 	 * Notify our item selected listener (if there is one) of a change after finishing scrolling.
 	 */
-	private void invokeOnItemScrollListener() {
+	protected void invokeOnItemScrollListener() {
 		if (mOnItemSelectedListener != null) {
 			mOnItemSelectedListener.onItemSelected(this, mCurrentItemIndex);
 		}
@@ -242,6 +242,14 @@ public abstract class AbsWheelView extends ViewGroup {
 	public boolean onTouchEvent(MotionEvent event) {
 		if(mAdapter == null) {
 			return false;
+		}
+
+		switch (event.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				if (null != getParent()) {
+					getParent().requestDisallowInterceptTouchEvent(true);
+				}
+				break;
 		}
 
 		if (!mGestureDetector.onTouchEvent(event) && event.getAction() == MotionEvent.ACTION_UP) {
@@ -501,9 +509,9 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * 根据弧长计算变化的弧度
 	 * @param deltaY
 	 */
-	abstract int calculateScrollDegree(float deltaY, boolean addLastDegree);
+	protected abstract int calculateScrollDegree(float deltaY, boolean addLastDegree);
 
-	abstract int calculateScrollArcLength(float degree);
+	protected abstract int calculateScrollArcLength(float degree);
 
 	// Messages
 	private static final int MESSAGE_DO_FLING = 1;
@@ -622,7 +630,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	 *
 	 * @param down true if the scroll is going down, false if it is going up
 	 */
-	abstract void fillGap(boolean down);
+	protected abstract void fillGap(boolean down);
 
 
 	/**
@@ -772,10 +780,12 @@ public abstract class AbsWheelView extends ViewGroup {
 		}
 
 		public void markChildrenDirty() {
-			final ArrayList<View> scrap = mCurrentScrap;
-			final int scrapCount = scrap.size();
-			for (int i = 0; i < scrapCount; i++) {
-				scrap.get(i).forceLayout();
+			if (mViewTypeCount == 1 && mCurrentScrap != null) {
+				final ArrayList<View> scrap = mCurrentScrap;
+				final int scrapCount = scrap.size();
+				for (int i = 0; i < scrapCount; i++) {
+					scrap.get(i).forceLayout();
+				}
 			}
 		}
 

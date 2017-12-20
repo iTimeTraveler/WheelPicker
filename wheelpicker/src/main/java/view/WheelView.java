@@ -410,7 +410,7 @@ public class WheelView extends AbsWheelView {
 	}
 
 	@Override
-	void fillGap(boolean down) {
+	protected void fillGap(boolean down) {
 		final int count = getChildCount();
 		//down表示向上滑动的操作
 		if (down) {
@@ -736,10 +736,21 @@ public class WheelView extends AbsWheelView {
 		return (int) (degree * Math.PI * mRadius / 180);
 	}
 
-	public void setSelectItem(int index){
-		if(mAdapter == null || index < 0 || index >= mAdapter.getCount()){
+	/**
+	 * 设置选中项
+	 * @param position
+	 */
+	public void setSelectItem(int position){
+		if(mAdapter == null){
 			return;
 		}
-		mCurrentItemIndex = index;
+		position = Math.max(Math.min(position, mAdapter.getCount() - 1), 0);
+		int idealFirst = position - ((SHOW_COUNT - 2) >> 1);
+		mCurrentItemIndex = position;
+		mFirstPosition = Math.max(idealFirst, 0);
+
+		requestLayout();
+		invalidate();
+		invokeOnItemScrollListener();
 	}
 }

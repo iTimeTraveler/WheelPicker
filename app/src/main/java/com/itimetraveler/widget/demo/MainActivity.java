@@ -13,9 +13,9 @@ import view.WheelView;
 
 
 public class MainActivity extends AppCompatActivity {
-    TextView mTextView;
-    WheelView mWheelView;
-    NumericWheelAdapter adapter;
+    private TextView mTextView;
+    private WheelView mWheelView;
+    private NumericWheelAdapter adapter;
 
     private TextWheelPicker mTextWheelPicker;
 
@@ -26,17 +26,17 @@ public class MainActivity extends AppCompatActivity {
 
         mTextView = (TextView) findViewById(R.id.hello_world);
 
-        adapter = new NumericWheelAdapter(this, 1, 15);
-        mWheelView = (WheelView) findViewById(R.id.wheel_picker);
-        mWheelView.setAdapter(adapter);
-        mWheelView.setSelectItem(2);
-
-        mWheelView.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AbsWheelView parentView, int index) {
+//        adapter = new NumericWheelAdapter(this, 1, 15);
+//        mWheelView = (WheelView) findViewById(R.id.wheel_picker);
+//        mWheelView.setAdapter(adapter);
+//        mWheelView.setSelectItem(2);
+//
+//        mWheelView.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AbsWheelView parentView, int index) {
 //                mTextView.setText("" + index);
-            }
-        });
+//            }
+//        });
 
 
         ArrayList<String> mList = new ArrayList<String>();
@@ -51,5 +51,6 @@ public class MainActivity extends AppCompatActivity {
                 mTextView.setText("" + index);
             }
         });
+        mTextWheelPicker.setSelectItem(20);
     }
 }
