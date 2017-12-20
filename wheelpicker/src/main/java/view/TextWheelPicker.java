@@ -21,23 +21,14 @@ public class TextWheelPicker extends WheelView {
 	private TextAdapter mAdapter;
 	private List<String> mStrList;
 
-	/**
-	 * Constructor
-	 */
 	public TextWheelPicker(Context context) {
 		this(context, null);
 	}
 
-	/**
-	 * Constructor
-	 */
 	public TextWheelPicker(Context context, @Nullable AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	/**
-	 * Constructor
-	 */
 	public TextWheelPicker(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		mAdapter = new TextAdapter(context);

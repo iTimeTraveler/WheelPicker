@@ -483,7 +483,20 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	/**
-	 * 根据序号计算偏转角
+	 * 根据序号计算偏转角, 度数上方为正，下方为负
+	 *
+	 *          · · · +
+	 *      ·             +
+	 *    ·                 +
+	 *   ·                   +
+	 *  ·                     +
+	 *  ·          0          0
+	 *  ·                     -
+	 *   ·                   -
+	 *    ·                 -
+	 *      ·             -
+	 *          · · · -
+	 *
 	 * @param position
 	 */
 	protected int getDeflectionDegree(int position){
@@ -537,7 +550,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					// scrolling is not finished when it comes to final Y
 					// so, finish it manually
-					if (Math.abs(velocityDegree) < MIN_DELTA_FOR_SCROLLING) {
+					if (Math.abs(velocityDegree) <= MIN_DELTA_FOR_SCROLLING) {
 						mScroller.forceFinished(true);
 					}
 					if (!mScroller.isFinished()) {
@@ -609,7 +622,6 @@ public abstract class AbsWheelView extends ViewGroup {
 		mScrollingDegree = 0;
 		mLastScrollingDegree = 0;
 
-		requestLayout();
 		postInvalidate();
 		invokeOnItemScrollListener();
 	}
