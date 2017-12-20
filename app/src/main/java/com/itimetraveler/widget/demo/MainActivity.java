@@ -25,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private NumericWheelAdapter adapter;
 
     private TextWheelPicker mTextWheelPicker;
+    private TextWheelPicker mDateTextWheelPicker;
+    private TextWheelPicker mHourTextWheelPicker;
+    private TextWheelPicker mMinuteTextWheelPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +49,13 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
 
-		List<String> mList = new ArrayList<String>();
+//		List<String> mList = new ArrayList<String>();
 //        for (int i = 0; i <= 200; i++){
 //            mList.add("" + i + "月" + i + "日 周四");
 //        }
 
-        int daysCount = 100;
-        mList = generateDateList(daysCount);
+        int daysCount = 50;
+        List<String> mList = generateDateList(daysCount);
         mTextWheelPicker = (TextWheelPicker) findViewById(R.id.text_wheel_picker);
         mTextWheelPicker.setTextList(mList);
         mTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
@@ -62,6 +65,52 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mTextWheelPicker.setSelectItem(daysCount);
+
+
+        //日期
+        final List<String> mDateList = generateDateList(daysCount);
+        mDateTextWheelPicker = (TextWheelPicker) findViewById(R.id.date_text_wheel_picker);
+        mDateTextWheelPicker.setTextList(mDateList);
+        mDateTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AbsWheelView parentView, int index) {
+                mTextView.setText("" + mDateList.get(index));
+            }
+        });
+        mDateTextWheelPicker.setCameraOffsetX(-70);
+        mDateTextWheelPicker.setSelectItem(daysCount);
+
+        //小时
+        final List<String> mHList = new ArrayList<String>();
+        for (int i = 1; i <= 12; i++){
+            mHList.add("" + i + "小时");
+        }
+        mHourTextWheelPicker = (TextWheelPicker) findViewById(R.id.hour_text_wheel_picker);
+        mHourTextWheelPicker.setTextList(mHList);
+        mHourTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AbsWheelView parentView, int index) {
+                mTextView.setText("" + mHList.get(index));
+            }
+        });
+        mHourTextWheelPicker.setCameraOffsetX(50);
+        mHourTextWheelPicker.setSelectItem(0);
+
+        //分钟
+        List<String> mMList = new ArrayList<String>();
+        for (int i = 1; i <= 60; i++){
+            mMList.add("" + i + "");
+        }
+        mMinuteTextWheelPicker = (TextWheelPicker) findViewById(R.id.minute_text_wheel_picker);
+        mMinuteTextWheelPicker.setTextList(mMList);
+        mMinuteTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AbsWheelView parentView, int index) {
+                mTextView.setText("" + index);
+            }
+        });
+        mMinuteTextWheelPicker.setCameraOffsetX(100);
+        mMinuteTextWheelPicker.setSelectItem(1);
     }
 
 
@@ -83,11 +132,11 @@ public class MainActivity extends AppCompatActivity {
             Calendar c1 = Calendar.getInstance();
             c1.setTime(new Date());
             c1.add(Calendar.DAY_OF_MONTH, i);// 今天+1天
-            arr[todayIdx + i] = dateFormat.format(c1.getTime()) + " " + weekFormat.format(c.getTime());
+            arr[todayIdx + i] = dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime());
 
-            Log.v("date c1", "i:"+ i + ", "+ dateFormat.format(c1.getTime()) + " " + weekFormat.format(c.getTime()));
+            Log.v("date c1", "i:"+ i + ", "+ dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime()));
         }
-        arr[todayIdx] = dateFormat.format(today);
+        arr[todayIdx] = dateFormat.format(today) + " 今天";
 
         Log.v("date", ""+ Arrays.toString(arr));
         Log.v("date today", ""+ dateFormat.format(today));

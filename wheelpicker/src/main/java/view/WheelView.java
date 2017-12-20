@@ -31,6 +31,8 @@ public class WheelView extends AbsWheelView {
 	//半径
 	private int mRadius;
 
+	private int mCameraOffsetX = 0;
+
 	private Paint mIndicatorPaint;
 	private Paint mDustPaint;
 	private LinearGradient mAboveGradient;
@@ -541,7 +543,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
-			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
+			mCamera.translate(mCamera.getLocationX() + mCameraOffsetX, mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -554,7 +556,7 @@ public class WheelView extends AbsWheelView {
 
 			canvas.save();
 			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop(), Region.Op.DIFFERENCE);
-			canvas.translate(offsetX, offsetY);
+			canvas.translate(offsetX - mCameraOffsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
 			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
@@ -604,7 +606,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.reset();
 			mCamera.save();
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
-			mCamera.translate(mCamera.getLocationX(), mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
+			mCamera.translate(mCamera.getLocationX() + mCameraOffsetX, mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -616,7 +618,7 @@ public class WheelView extends AbsWheelView {
 
 			canvas.save();
 			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop());
-			canvas.translate(offsetX, offsetY);
+			canvas.translate(offsetX - mCameraOffsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
 			//设置图片抗锯齿
 			canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
@@ -737,6 +739,10 @@ public class WheelView extends AbsWheelView {
 	@Override
 	protected int getShowCount() {
 		return SHOW_COUNT;
+	}
+
+	public void setCameraOffsetX(int offsetX){
+		mCameraOffsetX = offsetX;
 	}
 
 	/**
