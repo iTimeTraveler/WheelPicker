@@ -157,8 +157,10 @@ public class WheelView extends AbsWheelView {
 			mRecycler.addScrapView(child, 0);
 		}
 
-		// TODO: after first layout we should maybe start at the first visible position, not 0
-		measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
+		if (heightMode == MeasureSpec.AT_MOST) {
+			// TODO: after first layout we should maybe start at the first visible position, not 0
+			heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
+		}
 
 		setMeasuredDimension(widthSize, heightSize);
 	}
@@ -233,6 +235,14 @@ public class WheelView extends AbsWheelView {
 	}
 
 	/**
+	 * @return False to recycle the views used to measure this WheelView in
+	 *         UNSPECIFIED/AT_MOST modes.
+	 */
+	private boolean recycleOnMeasure() {
+		return false;
+	}
+
+	/**
 	 * Measures the height of the given range of children (inclusive) and
 	 * returns the height with this ListView's padding and divider heights
 	 * included. If maxHeight is provided, the measuring will stop when the
@@ -277,6 +287,7 @@ public class WheelView extends AbsWheelView {
 		// mItemCount - 1 since endPosition parameter is inclusive
 		endPosition = (endPosition == NO_POSITION) ? adapter.getCount() - 1 : endPosition;
 		final AbsWheelView.RecycleBin recycleBin = mRecycler;
+		final boolean recyle = recycleOnMeasure();
 		final boolean[] isScrap = mIsScrap;
 
 		for (i = startPosition; i <= endPosition; ++i) {
@@ -290,7 +301,10 @@ public class WheelView extends AbsWheelView {
 			}
 
 			// Recycle the view before we possibly return from the method
-			recycleBin.addScrapView(child, -1);
+			if (recyle && recycleBin.shouldRecycleViewType(
+					((LayoutParams) child.getLayoutParams()).viewType)) {
+				recycleBin.addScrapView(child, -1);
+			}
 
 			returnedHeight += child.getMeasuredHeight();
 
@@ -339,20 +353,6 @@ public class WheelView extends AbsWheelView {
 	}
 
 	/**
-	 * Fills the list from top to bottom, starting with mFirstPosition
-	 *
-	 * @param nextTop The location where the top of the first item should be
-	 *        drawn
-	 */
-	private void fillFromTop(int nextTop) {
-		mFirstPosition = Math.min(mFirstPosition, mItemCount - 1);
-		if (mFirstPosition < 0) {
-			mFirstPosition = 0;
-		}
-		fillDown(mFirstPosition, nextTop);
-	}
-
-	/**
 	 * Put a specific item at a specific location on the screen and then build
 	 * up and down from there.
 	 *
@@ -364,6 +364,8 @@ public class WheelView extends AbsWheelView {
 		View temp = makeAndAddView(position, top, true, getPaddingLeft(), false);
 		// Possibly changed again in fillUp if we add rows above this one.
 		mFirstPosition = position;
+		Log.e(TAG, "fillSpecific() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+
 
 		final int dividerHeight = 0;
 		fillUp(position - 1, temp.getTop() - dividerHeight);
@@ -390,6 +392,7 @@ public class WheelView extends AbsWheelView {
 			pos--;
 		}
 		mFirstPosition = pos + 1;
+		Log.e(TAG, "fillUp() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 	}
 
 	/**
@@ -422,6 +425,7 @@ public class WheelView extends AbsWheelView {
 			int paddingBottom = getPaddingBottom();
 			final int startOffset = count > 0 ? getChildAt(0).getTop() :
 					getHeight() - paddingBottom;
+			Log.e(TAG, "fillGap("+down+") >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 			fillUp(mFirstPosition - 1, startOffset);
 		}
 	}
@@ -734,6 +738,11 @@ public class WheelView extends AbsWheelView {
 	protected int calculateScrollArcLength(float degree) {
 		degree %= 360;
 		return (int) (degree * Math.PI * mRadius / 180);
+	}
+
+	@Override
+	protected int getShowCount() {
+		return SHOW_COUNT;
 	}
 
 	/**

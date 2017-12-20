@@ -34,10 +34,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	/** Minimum delta for scrolling */
 	private static final int MIN_DELTA_FOR_SCROLLING = 1;
 
-	//滚动动画时间间隔
-	private static final int SCROLLING_INTERVAL = 10;
-
-	//可见的第一个元素
+	//可见的第一个元素, 用于回收机制
 	protected int mFirstPosition = 0;
 
 	//当前选中的项
@@ -57,7 +54,6 @@ public abstract class AbsWheelView extends ViewGroup {
 	protected int mMaxItemHeight;
 	protected int mMaxItemWidth;
 
-	protected float mLastDownY;
 	protected float mLastMoveY;
 	protected float mLastScrollY;
 	protected float mLastFlingY;
@@ -346,6 +342,7 @@ public abstract class AbsWheelView extends ViewGroup {
 			lp = (LayoutParams) vlp;
 		}
 
+		lp.viewType = mAdapter.getItemViewType(position);
 		if (lp != vlp) {
 			child.setLayoutParams(lp);
 		}
@@ -368,19 +365,19 @@ public abstract class AbsWheelView extends ViewGroup {
 		}
 		mScrollingDegree = calculateScrollDegree(deltaY, true);
 		final boolean goUp = incrementalDeltaY < 0;
-		doScroll(goUp);
+		doScroll(goUp, "trackMotionScroll");
 	}
 
 	/**
 	 * 滚动时使用回收策略复用View
 	 * @param goUp 是否是向上滚动
 	 */
-	private void doScroll(boolean goUp){
+	private void doScroll(boolean goUp, String src){
 		final int childCount = getChildCount();
 		if (childCount == 0) {
 			return;
 		}
-		Log.e(TAG, "doScroll() >>> goUp:" + goUp + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+		Log.e(TAG, "doScroll() >>> src:" + src + ", goUp:" + goUp + " , mFirstPosition:" + mFirstPosition+ ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 
 		final int firstPosition = mFirstPosition;
 		int start = 0;	//需要回收的起始位置
@@ -426,7 +423,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		//填补空白区域
 		fillGap(goUp);
-		requestLayout();
+//		requestLayout();
 		postInvalidate();
 	}
 
@@ -502,7 +499,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * @param degree
 	 */
 	protected boolean isDegreeVisible(int degree){
-		return (degree >= -90 && degree <= 90);
+		return (degree > -90 && degree < 90);
 	}
 
 	/**
@@ -534,7 +531,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					mScrollingDegree += velocityDegree;
 					mLastFlingY = currY;
-					doScroll(velocityDegree > 0);
+					doScroll(velocityDegree > 0, "MESSAGE_DO_FLING");
 
 					Log.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
@@ -554,7 +551,7 @@ public abstract class AbsWheelView extends ViewGroup {
 
 					mScrollingDegree -= currY - mLastScrollY;
 					mLastScrollY = currY;
-					doScroll(mScrollingDegree > 0);
+					doScroll(mScrollingDegree > 0, "MESSAGE_DO_RECTIFY");
 
 					Log.e("MESSAGE_DO_RECTIFY", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
@@ -621,6 +618,9 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * Subclasses must override this method to layout their children.
 	 */
 	protected void layoutChildren() {}
+	protected int getShowCount() {
+		return 0;
+	}
 
 	/**
 	 * Fills the gap left open by a touch-scroll. During a touch scroll, children that
@@ -739,7 +739,14 @@ public abstract class AbsWheelView extends ViewGroup {
 			}
 			lp.scrappedFromPosition = position;
 
-			mCurrentScrap.add(scrap);
+			// Remove but don't scrap header or footer views, or views that
+			// should otherwise not be recycled.
+			final int viewType = lp.viewType;
+			if (mViewTypeCount == 1) {
+				mCurrentScrap.add(scrap);
+			} else {
+				mScrapViews[viewType].add(scrap);
+			}
 		}
 
 		/**
@@ -819,11 +826,20 @@ public abstract class AbsWheelView extends ViewGroup {
 
 
 	public static class LayoutParams extends ViewGroup.LayoutParams{
+		/**
+		 * View type for this view, as returned by
+		 * {@link android.widget.Adapter#getItemViewType(int) }
+		 */
+		int viewType;
 		int scrappedFromPosition;
 
 		public LayoutParams(Context c, AttributeSet attrs) { super(c, attrs); }
 		public LayoutParams(int width, int height) { super(width, height); }
 		public LayoutParams(ViewGroup.LayoutParams source) { super(source); }
+		public LayoutParams(int w, int h, int viewType) {
+			super(w, h);
+			this.viewType = viewType;
+		}
 	}
 
 
