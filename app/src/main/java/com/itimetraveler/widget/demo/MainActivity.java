@@ -21,6 +21,9 @@ import view.WheelView;
 
 public class MainActivity extends AppCompatActivity {
     private TextView mTextView;
+
+    private String s1, s2, s3, s4;
+
     private WheelView mWheelView;
     private NumericWheelAdapter adapter;
 
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        s1 = s2 = s3 = s4 = "";
         mTextView = (TextView) findViewById(R.id.hello_world);
 
 //        adapter = new NumericWheelAdapter(this, 1, 15);
@@ -49,19 +53,19 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
 
-//		List<String> mList = new ArrayList<String>();
-//        for (int i = 0; i <= 200; i++){
-//            mList.add("" + i + "月" + i + "日 周四");
-//        }
+		final List<String> mList = new ArrayList<String>();
+        for (int i = 0; i <= 200; i++){
+            mList.add("text " + i + "");
+        }
 
         int daysCount = 50;
-        List<String> mList = generateDateList(daysCount);
         mTextWheelPicker = (TextWheelPicker) findViewById(R.id.text_wheel_picker);
         mTextWheelPicker.setTextList(mList);
         mTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AbsWheelView parentView, int index) {
-                mTextView.setText("" + index);
+                s1 = "" + mList.get(index);
+                updateTextView();
             }
         });
         mTextWheelPicker.setSelectItem(daysCount);
@@ -85,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
         mDateTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AbsWheelView parentView, int index) {
-                mTextView.setText("" + mDateList.get(index));
+                s2 = "" + mDateList.get(index);
+                updateTextView();
             }
         });
         mDateTextWheelPicker.setCameraOffsetX(-70);
@@ -97,7 +102,8 @@ public class MainActivity extends AppCompatActivity {
         mHourTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AbsWheelView parentView, int index) {
-                mTextView.setText("" + mHList.get(index));
+                s3 = "" + mHList.get(index);
+                updateTextView();
             }
         });
         mHourTextWheelPicker.setCameraOffsetX(70);
@@ -109,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
         mMinuteTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AbsWheelView parentView, int index) {
-                mTextView.setText("" + mMList.get(index));
+                s4 = "" + mMList.get(index);
+                updateTextView();
             }
         });
         mMinuteTextWheelPicker.setCameraOffsetX(100);
@@ -145,5 +152,9 @@ public class MainActivity extends AppCompatActivity {
         Log.v("date today", ""+ dateFormat.format(today));
 
         return Arrays.asList(arr);
+    }
+
+    private void updateTextView(){
+        mTextView.setText(s1 + "  |  " + s2 + "  |  " + s3 + "  |  " + s4);
     }
 }
