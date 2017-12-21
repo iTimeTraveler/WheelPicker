@@ -45,7 +45,7 @@ public class WheelView extends AbsWheelView {
 	private static final boolean DRAW_AUXILIARY_LINE = false;
 
 	//指示器外侧元素缩放级别
-	private static final float OUTER_ITEM_SCALE = 0.90F;
+	private static final float OUTER_ITEM_SCALE = 0.95F;
 
 	//Camera远近
 	private static final float CAMERA_LOCATION_Z = 10;

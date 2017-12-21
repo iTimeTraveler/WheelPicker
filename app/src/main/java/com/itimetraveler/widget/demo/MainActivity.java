@@ -69,6 +69,17 @@ public class MainActivity extends AppCompatActivity {
 
         //日期
         final List<String> mDateList = generateDateList(daysCount);
+        //小时
+        final List<String> mHList = new ArrayList<String>();
+        for (int i = 1; i <= 12; i++){
+            mHList.add("" + String.format("%02d", i) + "");
+        }
+        //分钟
+        final List<String> mMList = new ArrayList<String>();
+        for (int i = 1; i <= 60; i++){
+            mMList.add("" + String.format("%02d", i)  + "");
+        }
+
         mDateTextWheelPicker = (TextWheelPicker) findViewById(R.id.date_text_wheel_picker);
         mDateTextWheelPicker.setTextList(mDateList);
         mDateTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
@@ -81,10 +92,6 @@ public class MainActivity extends AppCompatActivity {
         mDateTextWheelPicker.setSelectItem(daysCount);
 
         //小时
-        final List<String> mHList = new ArrayList<String>();
-        for (int i = 1; i <= 12; i++){
-            mHList.add("" + i + "小时");
-        }
         mHourTextWheelPicker = (TextWheelPicker) findViewById(R.id.hour_text_wheel_picker);
         mHourTextWheelPicker.setTextList(mHList);
         mHourTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
@@ -93,20 +100,16 @@ public class MainActivity extends AppCompatActivity {
                 mTextView.setText("" + mHList.get(index));
             }
         });
-        mHourTextWheelPicker.setCameraOffsetX(50);
+        mHourTextWheelPicker.setCameraOffsetX(70);
         mHourTextWheelPicker.setSelectItem(0);
 
         //分钟
-        List<String> mMList = new ArrayList<String>();
-        for (int i = 1; i <= 60; i++){
-            mMList.add("" + i + "");
-        }
         mMinuteTextWheelPicker = (TextWheelPicker) findViewById(R.id.minute_text_wheel_picker);
         mMinuteTextWheelPicker.setTextList(mMList);
         mMinuteTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AbsWheelView parentView, int index) {
-                mTextView.setText("" + index);
+                mTextView.setText("" + mMList.get(index));
             }
         });
         mMinuteTextWheelPicker.setCameraOffsetX(100);
