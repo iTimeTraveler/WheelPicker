@@ -130,7 +130,7 @@ public class WheelView extends AbsWheelView {
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-		measureMaxItemWidthHeight();
+		measureMaxItemWidthHeight(widthMode, widthSize);
 		int diameter = (calculateRadius(mMaxItemHeight)) << 1;
 
 		//适配wrap_content
@@ -629,11 +629,18 @@ public class WheelView extends AbsWheelView {
 	/**
 	 * 遍历得到所有子View中的最大高度
 	 */
-	private void measureMaxItemWidthHeight(){
+	private void measureMaxItemWidthHeight(int widthMode, int widthSize){
 		int maxWidth = 0;
 		int maxHeight = 0;
+		int count = 0;
+
+		//match_parent或者指定宽度就不遍历
+		if(widthMode == MeasureSpec.EXACTLY){
+			maxWidth = widthSize;
+			count = Math.min(SHOW_COUNT, mAdapter.getCount());
+		}
 		if(mAdapter != null){
-			for(int i = 0; i < mAdapter.getCount(); i++){
+			for(int i = 0; i < ((count == 0) ? mAdapter.getCount() : count); i++){
 				View v = mAdapter.getView(i, null, this);
 				v.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
 						MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
