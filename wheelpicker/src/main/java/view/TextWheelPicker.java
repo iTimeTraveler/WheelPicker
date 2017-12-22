@@ -41,9 +41,59 @@ public class TextWheelPicker extends WheelView {
 		mAdapter.notifyDataSetChanged();
 	}
 
+	public void setTheme(Theme theme){
+		switch (theme){
+			case black:
+				setBackgroundColor(0xFF000000);
+				setDefaultColor(0xFF575757);
+				setSelectColor(0xFFCCCCCC);
+				break;
+			case white:
+			default:
+				setBackgroundColor(0xFFFFFFFF);
+				setDefaultColor(0xFFAAAAAA);
+				setSelectColor(0xFF333333);
+				break;
+		}
+	}
+
+	/**
+	 * 字体大小
+	 * @param textSize
+	 */
+	public void setTextSize(int textSize){
+		mAdapter.setTextSize(textSize);
+	}
+
+	/**
+	 * 未选中项字体颜色
+	 * @param color
+	 */
+	public void setDefaultColor(int color){
+		mAdapter.setDefaultColor(color);
+	}
+
+	/**
+	 * 选中项字体颜色
+	 * @param selectColor
+	 */
+	public void setSelectColor(int selectColor) {
+		mAdapter.setSelectColor(selectColor);
+	}
+
+	//主题色
+	public enum Theme {
+		white, black
+	}
+
 	private static class TextAdapter extends WheelAdapter{
 		private Context mContext;
 		private List<String> mStrList;
+
+		//默认配置
+		private int mTextSize = 23;
+		private int mDefaultColor = 0xFFAAAAAA;
+		private int mSelectColor = 0xFF333333;
 
 		public TextAdapter(Context context){
 			mContext = context;
@@ -51,6 +101,18 @@ public class TextWheelPicker extends WheelView {
 
 		public void setTextList(List<String> list){
 			mStrList = list;
+		}
+
+		public void setTextSize(int mTextSize) {
+			this.mTextSize = mTextSize;
+		}
+
+		public void setDefaultColor(int mDefaultColor) {
+			this.mDefaultColor = mDefaultColor;
+		}
+
+		public void setSelectColor(int mSelectColor) {
+			this.mSelectColor = mSelectColor;
 		}
 
 		@Override
@@ -80,10 +142,10 @@ public class TextWheelPicker extends WheelView {
 				root.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 				TextView tv = new TextView(mContext);
 				tv.setPadding(20, 3, 20, 3);
-				tv.setTextSize(23);
+				tv.setTextSize(mTextSize);
 
 				//选中颜色
-				int[] colors = new int[] {0xFF333333, 0xFFAAAAAA};
+				int[] colors = new int[] {mSelectColor, mDefaultColor};
 				int[][] states = {{android.R.attr.state_selected}, {}};
 				tv.setTextColor(new ColorStateList(states, colors));
 				root.addView(tv);

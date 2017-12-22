@@ -423,7 +423,6 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		//填补空白区域
 		fillGap(goUp);
-//		requestLayout();
 		postInvalidate();
 	}
 

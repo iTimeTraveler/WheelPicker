@@ -2,7 +2,6 @@ package com.itimetraveler.widget.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 
 import java.text.Format;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
             mList.add("text " + i + "");
         }
 
-        int daysCount = 50;
         mTextWheelPicker = (TextWheelPicker) findViewById(R.id.text_wheel_picker);
         mTextWheelPicker.setTextList(mList);
         mTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
@@ -68,10 +66,12 @@ public class MainActivity extends AppCompatActivity {
                 updateTextView();
             }
         });
-        mTextWheelPicker.setSelectItem(daysCount);
+        mTextWheelPicker.setSelectItem(10);
+        mTextWheelPicker.setTheme(TextWheelPicker.Theme.white);
 
 
         //日期
+        int daysCount = 50;
         final List<String> mDateList = generateDateList(daysCount);
         //小时
         final List<String> mHList = new ArrayList<String>();
@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         });
         mDateTextWheelPicker.setCameraOffsetX(-70);
         mDateTextWheelPicker.setSelectItem(daysCount);
+
 
         //小时
         mHourTextWheelPicker = (TextWheelPicker) findViewById(R.id.hour_text_wheel_picker);
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private List<String> generateDateList(int daysCount){
-        Format dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Format dateFormat = new SimpleDateFormat("MM月dd日");
         Format weekFormat = new SimpleDateFormat("E");
         Date today = new Date();
 
@@ -134,22 +135,15 @@ public class MainActivity extends AppCompatActivity {
         for(int i = daysCount; i > 0; i--){
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
-            c.add(Calendar.DAY_OF_MONTH, -i);// 今天-1天
+            c.add(Calendar.DAY_OF_MONTH, -i);   // 今天-1天
             arr[todayIdx - i] = dateFormat.format(c.getTime()) + " " + weekFormat.format(c.getTime());
-
-            Log.v("date c", "i:"+ i + ", "+ dateFormat.format(c.getTime()) + " " + weekFormat.format(c.getTime()));
 
             Calendar c1 = Calendar.getInstance();
             c1.setTime(new Date());
-            c1.add(Calendar.DAY_OF_MONTH, i);// 今天+1天
+            c1.add(Calendar.DAY_OF_MONTH, i);   // 今天+1天
             arr[todayIdx + i] = dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime());
-
-            Log.v("date c1", "i:"+ i + ", "+ dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime()));
         }
         arr[todayIdx] = dateFormat.format(today) + " 今天";
-
-        Log.v("date", ""+ Arrays.toString(arr));
-        Log.v("date today", ""+ dateFormat.format(today));
 
         return Arrays.asList(arr);
     }

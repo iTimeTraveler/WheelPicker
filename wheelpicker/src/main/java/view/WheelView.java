@@ -11,6 +11,8 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Region;
 import android.graphics.Shader;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -33,6 +35,8 @@ public class WheelView extends AbsWheelView {
 
 	private int mCameraOffsetX = 0;
 
+	//分割线颜色
+	private int mDividerColor;
 	private Paint mIndicatorPaint;
 	private Paint mDustPaint;
 	private LinearGradient mAboveGradient;
@@ -49,6 +53,8 @@ public class WheelView extends AbsWheelView {
 
 	//Camera远近
 	private static final float CAMERA_LOCATION_Z = 10;
+
+	private static final int BACKGROUND_COLOR_MASK = 0x00FFFFFF;
 
 	/**
 	 * Constructor
@@ -86,15 +92,25 @@ public class WheelView extends AbsWheelView {
 	}
 
 	private void initPaints() {
+		int bgAlpha = 0;
+		int bgColor = 0;
+		Drawable mBackground = getBackground();
+		if(mBackground instanceof ColorDrawable){
+			bgAlpha = ((ColorDrawable) mBackground).getAlpha();
+			bgColor = ((ColorDrawable) mBackground).getColor() & BACKGROUND_COLOR_MASK;
+		}
+
 		mIndicatorPaint = new Paint();
-		mIndicatorPaint.setColor(Color.parseColor("#C8C7CC"));
+		mIndicatorPaint.setColor(mDividerColor == 0 ? (0x28000000 | (~bgColor & BACKGROUND_COLOR_MASK)) : mDividerColor);
 		mIndicatorPaint.setAntiAlias(true);
 
 		float[] pos = new float[19];
-		int[] x = getCircularGradientArray(0xAA, 0xFFFFFF, pos);
+		int[] x = getCircularGradientArray(Math.min(bgAlpha, 0xAA), bgColor, pos);
 		mAboveGradient = new LinearGradient(getWidth()/2, getPaddingTop(), getWidth()/2, (getHeight() - mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mBelowGradient = new LinearGradient(getWidth()/2, getHeight() - getPaddingBottom(), getWidth()/2, (getHeight() + mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mDustPaint = new Paint();
+
+		Log.v("color", "bgColor: " + Integer.toHexString(bgColor) + ", (0x28000000 | ~bgColor): " + Integer.toHexString(0x28000000 | ~bgColor) + ", bgAlpha:" + Integer.toHexString(bgAlpha));
 	}
 
 	/**
@@ -105,6 +121,7 @@ public class WheelView extends AbsWheelView {
 	 * @return   colors数组
 	 */
 	private int[] getCircularGradientArray(int concentrate, int background, float[] pos){
+		background &= BACKGROUND_COLOR_MASK;
 		if(pos == null || pos.length < 10){
 			pos = new float[10];
 		}
@@ -635,7 +652,7 @@ public class WheelView extends AbsWheelView {
 		int count = 0;
 
 		//match_parent或者指定宽度就不遍历
-		if(widthMode == MeasureSpec.EXACTLY){
+		if((widthMode == MeasureSpec.EXACTLY || widthMode == MeasureSpec.UNSPECIFIED) && widthSize > 0){
 			maxWidth = widthSize;
 			count = Math.min(SHOW_COUNT, mAdapter.getCount());
 		}
@@ -746,6 +763,12 @@ public class WheelView extends AbsWheelView {
 	@Override
 	protected int getShowCount() {
 		return SHOW_COUNT;
+	}
+
+	public void setDividerColor(int dividerColor) {
+		this.mDividerColor = dividerColor;
+		initPaints();
+		postInvalidate();
 	}
 
 	public void setCameraOffsetX(int offsetX){
