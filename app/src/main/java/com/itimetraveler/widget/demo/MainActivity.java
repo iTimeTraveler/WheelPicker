@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //日期
-        int daysCount = 50;
+        int daysCount = 500;
         final List<String> mDateList = generateDateList(daysCount);
         //小时
         final List<String> mHList = new ArrayList<String>();
@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         });
         mDateTextWheelPicker.setCameraOffsetX(-70);
         mDateTextWheelPicker.setSelectItem(daysCount);
+        mDateTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
 
 
         //小时
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         });
         mHourTextWheelPicker.setCameraOffsetX(70);
         mHourTextWheelPicker.setSelectItem(0);
+        mHourTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
 
         //分钟
         mMinuteTextWheelPicker = (TextWheelPicker) findViewById(R.id.minute_text_wheel_picker);
@@ -122,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         });
         mMinuteTextWheelPicker.setCameraOffsetX(100);
         mMinuteTextWheelPicker.setSelectItem(1);
+        mMinuteTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
     }
 
 

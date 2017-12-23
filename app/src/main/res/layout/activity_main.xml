@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:background="#FFFFFF"
+        android:background="#0D0D0D"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
 
