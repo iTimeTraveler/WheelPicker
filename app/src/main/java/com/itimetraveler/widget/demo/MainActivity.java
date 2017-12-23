@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 		final List<String> mList = new ArrayList<String>();
-        for (int i = 0; i <= 200; i++){
+        for (int i = 0; i <= 5000; i++){
             mList.add("text " + i + "");
         }
 
@@ -150,5 +150,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateTextView(){
         mTextView.setText(s1 + "  |  " + s2 + "  |  " + s3 + "  |  " + s4);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        TimeUtils.getInstance().setEndTime("onResume");
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        TimeUtils.getInstance().setEndTime("onWindowFocusChanged > hasFocus:" + hasFocus);
     }
 }

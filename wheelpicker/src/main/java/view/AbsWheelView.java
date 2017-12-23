@@ -17,7 +17,6 @@ import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import adapter.WheelAdapter;
 
@@ -462,10 +461,10 @@ public abstract class AbsWheelView extends ViewGroup {
 		Log.e("rectify after", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
 
 
-		Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
-		for (StackTraceElement elements : map.get(Thread.currentThread())){
-			Log.e("rectify -- stacks", ""+ elements.toString());
-		}
+//		Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
+//		for (StackTraceElement elements : map.get(Thread.currentThread())){
+//			Log.e("rectify -- stacks", ""+ elements.toString());
+//		}
 		Log.e("rectify", scrollingDegree+ "/" + mItemAngle + " = "+ scrollingDegree / mItemAngle);
 		Log.e("rectify", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
 

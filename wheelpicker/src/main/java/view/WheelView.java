@@ -658,11 +658,14 @@ public class WheelView extends AbsWheelView {
 		}
 		if(mAdapter != null){
 			for(int i = 0; i < ((count == 0) ? mAdapter.getCount() : count); i++){
-				View v = mAdapter.getView(i, null, this);
+				View v = obtainView(i, mIsScrap);
 				v.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
 						MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 				maxWidth = Math.max(maxWidth, v.getMeasuredWidth());
 				maxHeight = Math.max(maxHeight, v.getMeasuredHeight());
+
+				//复用同一View完成Measure任务，优化初始化时的内存占用和启动速度
+				mRecycler.addScrapView(v, i);
 			}
 		}
 		mMaxItemWidth = maxWidth;
