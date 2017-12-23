@@ -44,15 +44,17 @@ public class TextWheelPicker extends WheelView {
 	public void setTheme(Theme theme){
 		switch (theme){
 			case black:
-				setBackgroundColor(0xFF000000);
-				setDefaultColor(0xFF575757);
-				setSelectColor(0xFFCCCCCC);
+				setBackgroundColor(0xFF0D0D0D);
+				setDefaultColor(0xFF626262);
+				setSelectColor(0xFFCFCFCF);
+				setDividerColor(0xFF3C3C3C);
 				break;
 			case white:
 			default:
 				setBackgroundColor(0xFFFFFFFF);
-				setDefaultColor(0xFFAAAAAA);
+				setDefaultColor(0xFFA4A4A4);
 				setSelectColor(0xFF333333);
+				setDividerColor(0xFFCDCDCD);
 				break;
 		}
 	}
