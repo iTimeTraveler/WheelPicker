@@ -199,6 +199,20 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	@Override
+	protected void onDetachedFromWindow() {
+		clearMessages();
+		super.onDetachedFromWindow();
+
+		// Detach any view left in the scrap heap
+		mRecycler.clear();
+
+		if (mAdapter != null && mDataSetObserver != null) {
+			mAdapter.unregisterDataSetObserver(mDataSetObserver);
+			mDataSetObserver = null;
+		}
+	}
+
+	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		if (changed) {
 			int childCount = getChildCount();
