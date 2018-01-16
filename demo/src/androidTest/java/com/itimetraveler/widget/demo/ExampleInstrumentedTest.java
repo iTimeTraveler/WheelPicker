@@ -1,4 +1,4 @@
-package com.itimetraveler.widget.wheelpicker;
+package com.itimetraveler.widget.demo;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
 		// Context of the app under test.
 		Context appContext = InstrumentationRegistry.getTargetContext();
 
-		assertEquals("com.itimetraveler.widget.wheelpicker.test", appContext.getPackageName());
+		assertEquals("com.itimetraveler.widget.wheelpickerapp", appContext.getPackageName());
 	}
 }

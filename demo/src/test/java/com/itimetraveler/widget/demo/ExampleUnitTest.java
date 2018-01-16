@@ -1,4 +1,4 @@
-package com.itimetraveler.widget.wheelpicker;
+package com.itimetraveler.widget.demo;
 
 import org.junit.Test;
 
