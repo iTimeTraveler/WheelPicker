@@ -52,7 +52,7 @@ public class WheelView extends AbsWheelView {
 	private static final float OUTER_ITEM_SCALE = 0.95F;
 
 	//Camera远近
-	private static final float CAMERA_LOCATION_Z = 10;
+	private static final float CAMERA_LOCATION_Z = 5;
 
 	private static final int BACKGROUND_COLOR_MASK = 0x00FFFFFF;
 
@@ -553,14 +553,20 @@ public class WheelView extends AbsWheelView {
 		float offsetY = calculateItemOffsetY(degree);
 		int height = 0;
 
+		if(offsetY < 0) return -1;
 		if(bmp != null){
 			height = calculateHeightAfterRotate(degree, bmp.getHeight());
 			int offsetX = ((w - (int)(bmp.getWidth() * OUTER_ITEM_SCALE)) >> 1) + getPaddingLeft();
 
 			mMatrix.reset();
 			mCamera.save();
+//			mCamera.setLocation(mCameraOffsetX, 0, mRadius + offsetX * CAMERA_LOCATION_Z);
+			mCamera.setLocation(0, 0, -8);
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
-			mCamera.translate(mCamera.getLocationX() + mCameraOffsetX, mCamera.getLocationY(), CAMERA_LOCATION_Z + offsetZ);
+//			mCamera.translate(mCameraOffsetX, 0, offsetZ + mRadius * CAMERA_LOCATION_Z);
+			mCamera.translate(mCameraOffsetX, 0, offsetZ + CAMERA_LOCATION_Z);
+			Log.i(TAG, "mCamera.getLocationX():"+ mCamera.getLocationX() + ", mCamera.getLocationY():" + mCamera.getLocationY());
+			Log.i(TAG, "position:" + position + ", degree:" + degree + ", offsetZ:" + offsetZ + ", mRadius:" + mRadius);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);
@@ -572,6 +578,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
 
 			canvas.save();
+			//去掉指示器内部区域的多余绘制
 			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop(), Region.Op.DIFFERENCE);
 			canvas.translate(offsetX - mCameraOffsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
@@ -634,6 +641,7 @@ public class WheelView extends AbsWheelView {
 			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
 
 			canvas.save();
+			//只保留指示器内部区域
 			canvas.clipRect(0, ((h - mMaxItemHeight) >> 1) + getPaddingTop(), getWidth(), ((h + mMaxItemHeight) >> 1) + getPaddingTop());
 			canvas.translate(offsetX - mCameraOffsetX, offsetY);
 			canvas.drawBitmap(bmp, mMatrix, null);
@@ -692,7 +700,7 @@ public class WheelView extends AbsWheelView {
 	 */
 	private float calculateItemOffsetY(int degree){
 		if(degree <= -90 || degree >= 90){
-			return 0;
+			return -1;
 		}
 		double offsetAngle = (degree + (degree >= 0 ? 1 : -1) * (mItemAngle >> 1));
 		double offsetRadians = offsetAngle * Math.PI / 180;

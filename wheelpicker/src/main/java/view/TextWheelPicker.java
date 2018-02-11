@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -140,9 +139,8 @@ public class TextWheelPicker extends WheelView {
 				viewHolder = (ViewHolder) convertView.getTag();
 			}else{
 				viewHolder = new ViewHolder();
-				RelativeLayout root = new RelativeLayout(mContext);
-				root.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 				TextView tv = new TextView(mContext);
+				tv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 				tv.setPadding(20, 3, 20, 3);
 				tv.setTextSize(mTextSize);
 
@@ -150,10 +148,9 @@ public class TextWheelPicker extends WheelView {
 				int[] colors = new int[] {mSelectColor, mDefaultColor};
 				int[][] states = {{android.R.attr.state_selected}, {}};
 				tv.setTextColor(new ColorStateList(states, colors));
-				root.addView(tv);
 
 				viewHolder.textView = tv;
-				convertView = root;
+				convertView = tv;
 				convertView.setTag(viewHolder);
 			}
 			viewHolder.textView.setText(mStrList.get(position));
