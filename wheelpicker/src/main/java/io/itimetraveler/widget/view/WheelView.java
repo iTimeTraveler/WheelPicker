@@ -1,4 +1,4 @@
-package view;
+package io.itimetraveler.widget.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,7 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import adapter.WheelAdapter;
+import io.itimetraveler.widget.adapter.WheelAdapter;
 
 /**
  * Created by iTimeTraveler on 2017/12/8.
@@ -52,7 +52,7 @@ public class WheelView extends AbsWheelView {
 	private static final float OUTER_ITEM_SCALE = 0.95F;
 
 	//Camera远近
-	private static final float CAMERA_LOCATION_Z = 5;
+	private static final float CAMERA_LOCATION_Z = 0.5f;
 
 	private static final int BACKGROUND_COLOR_MASK = 0x00FFFFFF;
 
@@ -172,17 +172,17 @@ public class WheelView extends AbsWheelView {
 			mRecycler.addScrapView(child, 0);
 		}
 
-		if (heightMode == MeasureSpec.AT_MOST) {
-			// TODO: after first layout we should maybe start at the first visible position, not 0
-			heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
-		}
+//		if (heightMode == MeasureSpec.AT_MOST) {
+//			// TODO: after first layout we should maybe start at the first visible position, not 0
+//			heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
+//		}
 
 		setMeasuredDimension(widthSize, heightSize);
 	}
 
 	@Override
 	protected void layoutChildren() {
-		if (mAdapter == null) {
+		if (mAdapter == null || mAdapter.getCount() <= 0) {
 			return;
 		}
 
@@ -249,6 +249,9 @@ public class WheelView extends AbsWheelView {
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 
+	@Override
+	public void setSelection(int position) {}
+
 	/**
 	 * @return False to recycle the views used to measure this WheelView in
 	 *         UNSPECIFIED/AT_MOST modes.
@@ -268,7 +271,7 @@ public class WheelView extends AbsWheelView {
 	 * @param startPosition The position of the first child to be shown.
 	 * @param endPosition The (inclusive) position of the last child to be
 	 *            shown. Specify {@link #NO_POSITION} if the last child should be
-	 *            the last available child from the adapter.
+	 *            the last available child from the io.itimetraveler.widget.adapter.
 	 * @param maxHeight The maximum height that will be returned (if all the
 	 *            children don't fit in this value, this value will be
 	 *            returned).
@@ -564,7 +567,7 @@ public class WheelView extends AbsWheelView {
 			mCamera.setLocation(0, 0, -8);
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
 //			mCamera.translate(mCameraOffsetX, 0, offsetZ + mRadius * CAMERA_LOCATION_Z);
-			mCamera.translate(mCameraOffsetX, 0, offsetZ + CAMERA_LOCATION_Z);
+			mCamera.translate(mCameraOffsetX, 0, offsetZ * CAMERA_LOCATION_Z);
 			Log.i(TAG, "mCamera.getLocationX():"+ mCamera.getLocationX() + ", mCamera.getLocationY():" + mCamera.getLocationY());
 			Log.i(TAG, "position:" + position + ", degree:" + degree + ", offsetZ:" + offsetZ + ", mRadius:" + mRadius);
 			//绕X轴翻转
@@ -774,6 +777,18 @@ public class WheelView extends AbsWheelView {
 	@Override
 	protected int getShowCount() {
 		return SHOW_COUNT;
+	}
+
+	public int getMaxItemWidth() {
+		return mMaxItemWidth;
+	}
+
+	public int getMaxItemHeight() {
+		return mMaxItemHeight;
+	}
+
+	public int getCurrentItemIndex() {
+		return mCurrentItemIndex;
 	}
 
 	public void setDividerColor(int dividerColor) {

@@ -1,4 +1,4 @@
-package view;
+package io.itimetraveler.widget.view;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -10,34 +10,36 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import adapter.WheelAdapter;
+import io.itimetraveler.widget.adapter.WheelAdapter;
 
 /**
  * Created by iTimeTraveler on 2017/12/19.
  */
-public class TextWheelPicker extends WheelView {
+public class TextWheelView extends WheelView {
 
 	private TextAdapter mAdapter;
 	private List<String> mStrList;
 
-	public TextWheelPicker(Context context) {
+	public TextWheelView(Context context) {
 		this(context, null);
 	}
 
-	public TextWheelPicker(Context context, @Nullable AttributeSet attrs) {
+	public TextWheelView(Context context, @Nullable AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	public TextWheelPicker(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+	public TextWheelView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		mAdapter = new TextAdapter(context);
 		setAdapter(mAdapter);
 	}
 
 	public void setTextList(List<String> list){
+		if (list == null || list.size() <= 0) return;
 		mStrList = list;
 		mAdapter.setTextList(list);
 		mAdapter.notifyDataSetChanged();
+		setSelectItem(0);
 	}
 
 	public void setTheme(Theme theme){
@@ -92,7 +94,7 @@ public class TextWheelPicker extends WheelView {
 		private List<String> mStrList;
 
 		//默认配置
-		private int mTextSize = 23;
+		private int mTextSize = 20;
 		private int mDefaultColor = 0xFFAAAAAA;
 		private int mSelectColor = 0xFF333333;
 

@@ -11,49 +11,57 @@
         android:text="Hello World!"
         android:layout_centerInParent="true"/>
     
-    <view.WheelView
+    <!--<io.itimetraveler.widget.view.WheelView-->
+        <!--android:id="@+id/wheel_view"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingLeft="20dp"-->
+        <!--android:paddingRight="20dp"-->
+        <!--android:visibility="gone"-->
+        <!--android:background="#ffffff"/>-->
+
+    <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+        <!--android:id="@+id/text_wheel_picker"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingLeft="20dp"-->
+        <!--android:paddingRight="20dp"/>-->
+
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingLeft="20dp"-->
+        <!--android:paddingRight="20dp"-->
+        <!--android:background="#0D0D0D"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+            <!--android:id="@+id/date_text_wheel_picker"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="3"/>-->
+
+        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+            <!--android:id="@+id/hour_text_wheel_picker"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"/>-->
+
+        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+            <!--android:id="@+id/minute_text_wheel_picker"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"/>-->
+    <!--</LinearLayout>-->
+
+    <io.itimetraveler.widget.picker.WheelPicker
         android:id="@+id/wheel_picker"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:visibility="gone"
         android:background="#ffffff"/>
-
-    <view.TextWheelPicker
-        android:id="@+id/text_wheel_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"/>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:background="#0D0D0D"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
-
-        <view.TextWheelPicker
-            android:id="@+id/date_text_wheel_picker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"/>
-
-        <view.TextWheelPicker
-            android:id="@+id/hour_text_wheel_picker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
-        <view.TextWheelPicker
-            android:id="@+id/minute_text_wheel_picker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-    </LinearLayout>
 
 </RelativeLayout>

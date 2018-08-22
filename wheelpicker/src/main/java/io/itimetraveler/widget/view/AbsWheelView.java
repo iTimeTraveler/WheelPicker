@@ -1,9 +1,10 @@
-package view;
+package io.itimetraveler.widget.view;
 
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -11,19 +12,22 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.Scroller;
 
 import java.util.ArrayList;
 
-import adapter.WheelAdapter;
+import io.itimetraveler.widget.adapter.WheelAdapter;
 
 /**
  * Created by iTimeTraveler on 2017/12/11.
  */
-public abstract class AbsWheelView extends ViewGroup {
+public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 
 	private static final String TAG = "AbsWheelView";
 
@@ -139,8 +143,8 @@ public abstract class AbsWheelView extends ViewGroup {
 	}
 
 	/**
-	 * Sets wheel adapter
-	 * @param adapter the new wheel adapter
+	 * Sets wheel io.itimetraveler.widget.adapter
+	 * @param adapter the new wheel io.itimetraveler.widget.adapter
 	 */
 	public void setAdapter(WheelAdapter adapter){
 		if(mAdapter != null && mDataSetObserver != null){
@@ -153,6 +157,10 @@ public abstract class AbsWheelView extends ViewGroup {
 
 		requestLayout();
 		invalidate();
+	}
+
+	public WheelAdapter getAdapter() {
+		return mAdapter;
 	}
 
 
@@ -188,8 +196,8 @@ public abstract class AbsWheelView extends ViewGroup {
 		super.onAttachedToWindow();
 
 		if (mAdapter != null && mDataSetObserver == null) {
-//			mDataSetObserver = new AdapterDataSetObserver();
-//			mAdapter.registerDataSetObserver(mDataSetObserver);
+			mDataSetObserver = new AdapterDataSetObserver();
+			mAdapter.registerDataSetObserver(mDataSetObserver);
 
 			// Data may have changed while we were detached. Refresh.
 			mDataChanged = true;
@@ -230,6 +238,15 @@ public abstract class AbsWheelView extends ViewGroup {
 			mDataChanged = true;
 		}
 		super.onSizeChanged(w, h, oldw, oldh);
+	}
+
+	@Override
+	public View getSelectedView() {
+		if (mItemCount > 0 && mCurrentItemIndex >= 0) {
+			return getChildAt(mCurrentItemIndex - mFirstPosition);
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -664,7 +681,7 @@ public abstract class AbsWheelView extends ViewGroup {
 	 * storage: ActiveViews and ScrapViews. ActiveViews are those views which were onscreen at the
 	 * start of a layout. By construction, they are displaying current information. At the end of
 	 * layout, all views in ActiveViews are demoted to ScrapViews. ScrapViews are old views that
-	 * could potentially be used by the adapter to avoid allocating views unnecessarily.
+	 * could potentially be used by the io.itimetraveler.widget.adapter to avoid allocating views unnecessarily.
 	 */
 	class RecycleBin{
 		/**
@@ -681,7 +698,7 @@ public abstract class AbsWheelView extends ViewGroup {
 		private View[] mActiveViews = new View[0];
 
 		/**
-		 * Unsorted views that can be used by the adapter as a convert view.
+		 * Unsorted views that can be used by the io.itimetraveler.widget.adapter as a convert view.
 		 */
 		private ArrayList<View>[] mScrapViews;
 
@@ -845,6 +862,57 @@ public abstract class AbsWheelView extends ViewGroup {
 			for (int j = 0; j < scrapCount; j++) {
 				removeDetachedView(scrap.remove(scrapCount - 1 - j), false);
 			}
+		}
+	}
+
+	class AdapterDataSetObserver extends DataSetObserver {
+
+		private Parcelable mInstanceState = null;
+
+		@Override
+		public void onChanged() {
+			mDataChanged = true;
+			mOldItemCount = mItemCount;
+			mItemCount = getAdapter().getCount();
+
+//			// Detect the case where a cursor that was previously invalidated has
+//			// been repopulated with new data.
+//			if (AdapterView.this.getAdapter().hasStableIds() && mInstanceState != null
+//					&& mOldItemCount == 0 && mItemCount > 0) {
+//				AdapterView.this.onRestoreInstanceState(mInstanceState);
+//				mInstanceState = null;
+//			} else {
+//				rememberSyncState();
+//			}
+//			checkFocus();
+			requestLayout();
+		}
+
+		@Override
+		public void onInvalidated() {
+			mDataChanged = true;
+
+//			if (AdapterView.this.getAdapter().hasStableIds()) {
+//				// Remember the current state for the case where our hosting activity is being
+//				// stopped and later restarted
+//				mInstanceState = AdapterView.this.onSaveInstanceState();
+//			}
+
+			// Data is invalid so we should reset our state
+			mOldItemCount = mItemCount;
+			mItemCount = 0;
+//			mSelectedPosition = INVALID_POSITION;
+//			mSelectedRowId = INVALID_ROW_ID;
+//			mNextSelectedPosition = INVALID_POSITION;
+//			mNextSelectedRowId = INVALID_ROW_ID;
+//			mNeedSync = false;
+//
+//			checkFocus();
+			requestLayout();
+		}
+
+		public void clearSavedState() {
+			mInstanceState = null;
 		}
 	}
 
