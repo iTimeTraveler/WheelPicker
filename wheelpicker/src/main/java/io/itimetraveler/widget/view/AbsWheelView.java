@@ -7,22 +7,20 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.Scroller;
 
 import java.util.ArrayList;
 
 import io.itimetraveler.widget.adapter.WheelAdapter;
+import io.itimetraveler.widget.utils.Logger;
 
 /**
  * Created by iTimeTraveler on 2017/12/11.
@@ -291,12 +289,12 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 
 		@Override
 		public boolean onDown(MotionEvent e) {
-			Log.e("gesture", "onDown: " + e.toString());
+			Logger.e("gesture", "onDown: " + e.toString());
 			if (isScrollingPerformed) {
 				mLastScrollingDegree = mScrollingDegree;
 				mScroller.forceFinished(true);
 				clearMessages();
-				Log.e("ondown=====", "mScrollingDegree:"+ mScrollingDegree + ", mLastScrollingDegree:"+ mLastScrollingDegree + ", mCurrentItemIndex:"+ mCurrentItemIndex);
+				Logger.e("ondown=====", "mScrollingDegree:"+ mScrollingDegree + ", mLastScrollingDegree:"+ mLastScrollingDegree + ", mCurrentItemIndex:"+ mCurrentItemIndex);
 				return true;
 			}
 			return true;
@@ -304,19 +302,19 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
-			Log.e("gesture", "onSingleTapUp: " + e.toString());
+			Logger.e("gesture", "onSingleTapUp: " + e.toString());
 			return false;
 		}
 
 		@Override
 		public boolean onScroll(MotionEvent downE, MotionEvent moveE, float distanceX, float distanceY) {
-			Log.e("gesture", "onScroll:============================start================================");
-			Log.e("gesture", "onScroll: e1 >>> " + downE.toString());
-			Log.e("gesture", "onScroll: e2 >>> " + moveE.toString());
-			Log.e("gesture", "onScroll: moveE.getRawY() - downE.getRawY() >>> " + (moveE.getRawY() - downE.getRawY()));
-			Log.e("gesture", "onScroll: distanceX >>> " + distanceX);
-			Log.e("gesture", "onScroll: distanceY >>> " + distanceY);
-			Log.e("gesture", "onScroll:============================end================================");
+			Logger.e("gesture", "onScroll:============================start================================");
+			Logger.e("gesture", "onScroll: e1 >>> " + downE.toString());
+			Logger.e("gesture", "onScroll: e2 >>> " + moveE.toString());
+			Logger.e("gesture", "onScroll: moveE.getRawY() - downE.getRawY() >>> " + (moveE.getRawY() - downE.getRawY()));
+			Logger.e("gesture", "onScroll: distanceX >>> " + distanceX);
+			Logger.e("gesture", "onScroll: distanceY >>> " + distanceY);
+			Logger.e("gesture", "onScroll:============================end================================");
 
 			startScrolling();
 			trackMotionScroll(moveE.getRawY() - downE.getRawY(), -distanceY);
@@ -325,17 +323,17 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-			Log.e("gesture", "onFling:----------------------------start----------------------------");
-			Log.e("gesture", "onFling: e1 >>> " + e1.toString());
-			Log.e("gesture", "onFling: e2 >>> " + e2.toString());
-			Log.e("gesture", "onFling: velocityX >>> " + velocityX);
-			Log.e("gesture", "onFling: velocityY >>> " + velocityY);
-			Log.e("gesture", "onFling:----------------------------end----------------------------");
+			Logger.e("gesture", "onFling:----------------------------start----------------------------");
+			Logger.e("gesture", "onFling: e1 >>> " + e1.toString());
+			Logger.e("gesture", "onFling: e2 >>> " + e2.toString());
+			Logger.e("gesture", "onFling: velocityX >>> " + velocityX);
+			Logger.e("gesture", "onFling: velocityY >>> " + velocityY);
+			Logger.e("gesture", "onFling:----------------------------end----------------------------");
 
 			int startY = calculateScrollArcLength(mScrollingDegree);
 			int minY = -(calculateScrollArcLength(mCurrentItemIndex * mItemAngle));
 			int maxY = calculateScrollArcLength((mItemCount - mCurrentItemIndex - 1) * mItemAngle);
-			Log.e("MESSAGE_DO_FLING=====", "mScrollingDegree:"+ mScrollingDegree + ", startY:"+ startY+ " ,velocityY:" + -velocityY + ", minY:"+ minY + ", maxY:"+ maxY);
+			Logger.e("MESSAGE_DO_FLING=====", "mScrollingDegree:"+ mScrollingDegree + ", startY:"+ startY+ " ,velocityY:" + -velocityY + ", minY:"+ minY + ", maxY:"+ maxY);
 			mLastFlingY = startY;
 			mScroller.fling(0, startY, 0, (int) -velocityY, 0, 0, minY, maxY);
 			sendNextMessage(MESSAGE_DO_FLING);
@@ -407,7 +405,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 		if (childCount == 0) {
 			return;
 		}
-		Log.e(TAG, "doScroll() >>> src:" + src + ", goUp:" + goUp + " , mFirstPosition:" + mFirstPosition+ ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+		Logger.e(TAG, "doScroll() >>> src:" + src + ", goUp:" + goUp + " , mFirstPosition:" + mFirstPosition+ ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 
 		final int firstPosition = mFirstPosition;
 		int start = 0;	//需要回收的起始位置
@@ -485,26 +483,26 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 			mScrollingDegree = remainDegree;
 		}
 
-		Log.e("rectify before", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+		Logger.e("rectify before", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
 
 		mCurrentItemIndex += validCount;
 
-		Log.e("rectify after", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+		Logger.e("rectify after", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
 
 
 //		Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
 //		for (StackTraceElement elements : map.get(Thread.currentThread())){
-//			Log.e("rectify -- stacks", ""+ elements.toString());
+//			Logger.e("rectify -- stacks", ""+ elements.toString());
 //		}
-		Log.e("rectify", scrollingDegree+ "/" + mItemAngle + " = "+ scrollingDegree / mItemAngle);
-		Log.e("rectify", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+		Logger.e("rectify", scrollingDegree+ "/" + mItemAngle + " = "+ scrollingDegree / mItemAngle);
+		Logger.e("rectify", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
 
 		//使用动画滚动到选中位置
 		if (Math.abs(mScrollingDegree) > MIN_DELTA_FOR_SCROLLING) {
 			mLastScrollY = 0;
 			int duration = (int) Math.min(RECTIFY_ANIM_DURATION, Math.max(RECTIFY_ANIM_DURATION*0.3, Math.abs(RECTIFY_ANIM_DURATION * mScrollingDegree * 1.0F / mItemAngle)));
 			mScroller.startScroll(0, 0, 0, mScrollingDegree, duration);
-			Log.e("rectify", "duration =" + duration + ", mScrollingDegree:" + mScrollingDegree);
+			Logger.e("rectify", "duration =" + duration + ", mScrollingDegree:" + mScrollingDegree);
 			sendNextMessage(MESSAGE_DO_RECTIFY);
 		} else {
 			finishScrolling();
@@ -568,14 +566,14 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 				case MESSAGE_DO_FLING:
 
 					int velocityDegree = calculateScrollDegree(mLastFlingY - currY, false);
-					Log.e("MESSAGE_DO_FLING before", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
-					Log.e("MESSAGE_DO_FLING before", "velocityDegree:" + velocityDegree  + ", mCurrentItemIndex:" + mCurrentItemIndex);
+					Logger.e("MESSAGE_DO_FLING before", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					Logger.e("MESSAGE_DO_FLING before", "velocityDegree:" + velocityDegree  + ", mCurrentItemIndex:" + mCurrentItemIndex);
 
 					mScrollingDegree += velocityDegree;
 					mLastFlingY = currY;
 					doScroll(velocityDegree > 0, "MESSAGE_DO_FLING");
 
-					Log.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					Logger.e("MESSAGE_DO_FLING **", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastFlingY:"+ mLastFlingY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
 					// scrolling is not finished when it comes to final Y
 					// so, finish it manually
@@ -589,13 +587,13 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 					}
 					break;
 				case MESSAGE_DO_RECTIFY:
-					Log.e("MESSAGE_DO_RECTIFY befo", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					Logger.e("MESSAGE_DO_RECTIFY befo", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
 					mScrollingDegree -= currY - mLastScrollY;
 					mLastScrollY = currY;
 					doScroll(mScrollingDegree > 0, "MESSAGE_DO_RECTIFY");
 
-					Log.e("MESSAGE_DO_RECTIFY", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
+					Logger.e("MESSAGE_DO_RECTIFY", "mScrollingDegree:" + mScrollingDegree +", currY:"+ currY + ", mScroller.getFinalY():" +mScroller.getFinalY() + ", mLastScrollY:"+ mLastScrollY  + ", mScroller.isFinished():" + mScroller.isFinished());
 
 					// scrolling is not finished when it comes to final Y
 					// so, finish it manually
@@ -644,7 +642,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 	 * Finishes scrolling
 	 */
 	void finishScrolling() {
-		Log.e(TAG, "finishScrolling() >>> " + mScrollingDegree + ", mLastScrollingDegree:" + mLastScrollingDegree);
+		Logger.e(TAG, "finishScrolling() >>> " + mScrollingDegree + ", mLastScrollingDegree:" + mLastScrollingDegree);
 		if (isScrollingPerformed) {
 			isScrollingPerformed = false;
 		}

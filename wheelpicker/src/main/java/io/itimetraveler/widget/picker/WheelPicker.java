@@ -70,6 +70,11 @@ public class WheelPicker extends FrameLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mDelegate.onMeasure();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         mDelegate.onLayout();
         super.onLayout(changed, left, top, right, bottom);
@@ -103,6 +108,7 @@ public class WheelPicker extends FrameLayout {
 
         void setOnItemSelectedListener(OnItemSelectedListener listener);
 
+        void onMeasure();
         void onLayout();
 
         void setEnabled(boolean enabled);

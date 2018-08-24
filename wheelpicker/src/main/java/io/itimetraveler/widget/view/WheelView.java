@@ -15,11 +15,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import io.itimetraveler.widget.adapter.WheelAdapter;
+import io.itimetraveler.widget.utils.Logger;
 
 /**
  * Created by iTimeTraveler on 2017/12/8.
@@ -110,7 +110,7 @@ public class WheelView extends AbsWheelView {
 		mBelowGradient = new LinearGradient(getWidth()/2, getHeight() - getPaddingBottom(), getWidth()/2, (getHeight() + mMaxItemHeight) / 2, x, pos, Shader.TileMode.CLAMP);
 		mDustPaint = new Paint();
 
-		Log.v("color", "bgColor: " + Integer.toHexString(bgColor) + ", (0x28000000 | ~bgColor): " + Integer.toHexString(0x28000000 | ~bgColor) + ", bgAlpha:" + Integer.toHexString(bgAlpha));
+		Logger.v("color", "bgColor: " + Integer.toHexString(bgColor) + ", (0x28000000 | ~bgColor): " + Integer.toHexString(0x28000000 | ~bgColor) + ", bgAlpha:" + Integer.toHexString(bgAlpha));
 	}
 
 	/**
@@ -382,7 +382,7 @@ public class WheelView extends AbsWheelView {
 		View temp = makeAndAddView(position, top, true, getPaddingLeft(), false);
 		// Possibly changed again in fillUp if we add rows above this one.
 		mFirstPosition = position;
-		Log.e(TAG, "fillSpecific() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+		Logger.e(TAG, "fillSpecific() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 
 
 		final int dividerHeight = 0;
@@ -410,7 +410,7 @@ public class WheelView extends AbsWheelView {
 			pos--;
 		}
 		mFirstPosition = pos + 1;
-		Log.e(TAG, "fillUp() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+		Logger.e(TAG, "fillUp() >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class WheelView extends AbsWheelView {
 			int paddingBottom = getPaddingBottom();
 			final int startOffset = count > 0 ? getChildAt(0).getTop() :
 					getHeight() - paddingBottom;
-			Log.e(TAG, "fillGap("+down+") >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
+			Logger.e(TAG, "fillGap("+down+") >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 			fillUp(mFirstPosition - 1, startOffset);
 		}
 	}
@@ -568,8 +568,8 @@ public class WheelView extends AbsWheelView {
 			//镜头距离，根据滚轴上元素的偏转角设置镜头远近
 //			mCamera.translate(mCameraOffsetX, 0, offsetZ + mRadius * CAMERA_LOCATION_Z);
 			mCamera.translate(mCameraOffsetX, 0, offsetZ * CAMERA_LOCATION_Z);
-			Log.i(TAG, "mCamera.getLocationX():"+ mCamera.getLocationX() + ", mCamera.getLocationY():" + mCamera.getLocationY());
-			Log.i(TAG, "position:" + position + ", degree:" + degree + ", offsetZ:" + offsetZ + ", mRadius:" + mRadius);
+			Logger.i(TAG, "mCamera.getLocationX():"+ mCamera.getLocationX() + ", mCamera.getLocationY():" + mCamera.getLocationY());
+			Logger.i(TAG, "position:" + position + ", degree:" + degree + ", offsetZ:" + offsetZ + ", mRadius:" + mRadius);
 			//绕X轴翻转
 			mCamera.rotateX(degree);
 			mCamera.getMatrix(mMatrix);

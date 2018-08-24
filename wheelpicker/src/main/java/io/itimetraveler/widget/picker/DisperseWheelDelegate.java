@@ -3,6 +3,7 @@ package io.itimetraveler.widget.picker;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Parcelable;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -119,6 +120,10 @@ class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
             mWheelViews.add(textWheelView);
             mContainer.addView(textWheelView);
         }
+    }
+
+    @Override
+    public void onMeasure() {
     }
 
     @Override
