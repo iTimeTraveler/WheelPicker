@@ -872,6 +872,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 			mDataChanged = true;
 			mOldItemCount = mItemCount;
 			mItemCount = getAdapter().getCount();
+			mCurrentItemIndex = 0;
 
 //			// Detect the case where a cursor that was previously invalidated has
 //			// been repopulated with new data.
@@ -883,6 +884,9 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 //				rememberSyncState();
 //			}
 //			checkFocus();
+			clearMessages();
+			finishScrolling();
+			mCurrentItemIndex = 0;
 			requestLayout();
 		}
 
@@ -906,6 +910,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 //			mNeedSync = false;
 //
 //			checkFocus();
+			clearMessages();
 			requestLayout();
 		}
 

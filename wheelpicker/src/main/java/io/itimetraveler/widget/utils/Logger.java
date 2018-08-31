@@ -18,7 +18,7 @@ public final class Logger {
     }
 
     /**
-     * Send a {@link #VERBOSE} log message.
+     * Send a Log.VERBOSE log message.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
@@ -29,7 +29,7 @@ public final class Logger {
     }
 
     /**
-     * Send a {@link #DEBUG} log message.
+     * Send a Log.DEBUG log message.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
@@ -40,7 +40,7 @@ public final class Logger {
     }
 
     /**
-     * Send an {@link #INFO} log message.
+     * Send an Log.INFO log message.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
@@ -51,7 +51,7 @@ public final class Logger {
     }
 
     /**
-     * Send a {@link #WARN} log message.
+     * Send a Log.WARN log message.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
@@ -62,7 +62,7 @@ public final class Logger {
     }
 
     /**
-     * Send an {@link #ERROR} log message.
+     * Send an Log.ERROR log message.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
