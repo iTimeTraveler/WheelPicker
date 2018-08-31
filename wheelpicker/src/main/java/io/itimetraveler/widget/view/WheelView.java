@@ -578,7 +578,7 @@ public class WheelView extends AbsWheelView {
 			//使用pre将旋转中心移动到和Camera位置相同。
 			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			// 使用post将图片(View)移动到原来的位置
-			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
+			mMatrix.postTranslate(bmp.getWidth() / 2, mMaxItemHeight / 2);
 
 			canvas.save();
 			//去掉指示器内部区域的多余绘制
@@ -641,7 +641,7 @@ public class WheelView extends AbsWheelView {
 			//使用pre将旋转中心移动到和Camera位置相同。
 			mMatrix.preTranslate(- bmp.getWidth() / 2, - bmp.getHeight() / 2);
 			// 使用post将图片(View)移动到原来的位置
-			mMatrix.postTranslate(bmp.getWidth() / 2, bmp.getHeight() / 2);
+			mMatrix.postTranslate(bmp.getWidth() / 2, mMaxItemHeight / 2);
 
 			canvas.save();
 			//只保留指示器内部区域
