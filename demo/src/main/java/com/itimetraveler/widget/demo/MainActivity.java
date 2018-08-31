@@ -1,6 +1,5 @@
 package com.itimetraveler.widget.demo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,14 +16,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.NumericWheelAdapter;
+import io.itimetraveler.widget.adapter.PickerAdapter;
 import io.itimetraveler.widget.picker.TextWheelPicker;
 import io.itimetraveler.widget.picker.WheelPicker;
 import io.itimetraveler.widget.view.AbsWheelView;
+import io.itimetraveler.widget.view.TextWheelView;
 import io.itimetraveler.widget.view.WheelView;
 
 
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private NumericWheelAdapter adapter;
 
     private WheelPicker mWheelPicker;
-    private TextWheelPicker mTextWheelPicker;
+    private TextWheelView mTextWheelPicker;
     private TextWheelPicker mDateTextWheelPicker;
     private TextWheelPicker mHourTextWheelPicker;
     private TextWheelPicker mMinuteTextWheelPicker;
@@ -62,13 +62,20 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-
-//		final List<String> mList = new ArrayList<String>();
-//        for (int i = 0; i <= 5000; i++){
-//            mList.add("text " + i + "");
-//        }
+//        String[] arr = new String[]{"铜仁市",
+//                "德江县",
+//                "江口县",
+//                "思南县",
+//                "石阡县",
+//                "玉屏侗族自治县",
+//                "松桃苗族自治县",
+//                "印江土家族苗族自治县",
+//                "沿河土家族自治县",
+//                "万山特区",
+//                "其他"};
+//        final List<String> mList = Arrays.asList(arr);
 //
-//        mTextWheelPicker = (TextWheelPicker) findViewById(R.id.text_wheel_picker);
+//        mTextWheelPicker = (TextWheelView) findViewById(R.id.text_wheel_picker);
 //        mTextWheelPicker.setTextList(mList);
 //        mTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
 //            @Override
@@ -78,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 //        mTextWheelPicker.setSelectItem(10);
-//        mTextWheelPicker.setTheme(TextWheelPicker.Theme.white);
+//        mTextWheelPicker.setTheme(TextWheelView.Theme.WHITE);
 //
 //
 //        //日期
@@ -95,67 +102,58 @@ public class MainActivity extends AppCompatActivity {
 //            mMList.add("" + String.format("%02d", i)  + "");
 //        }
 //
-//        mDateTextWheelPicker = (TextWheelPicker) findViewById(R.id.date_text_wheel_picker);
-//        mDateTextWheelPicker.setTextList(mDateList);
-//        mDateTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AbsWheelView parentView, int index) {
-//                s2 = "" + mDateList.get(index);
-//                updateTextView();
-//            }
-//        });
-//        mDateTextWheelPicker.setCameraOffsetX(-70);
-//        mDateTextWheelPicker.setSelectItem(daysCount);
-//        mDateTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
-//
-//
-//        //小时
-//        mHourTextWheelPicker = (TextWheelPicker) findViewById(R.id.hour_text_wheel_picker);
-//        mHourTextWheelPicker.setTextList(mHList);
-//        mHourTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AbsWheelView parentView, int index) {
-//                s3 = "" + mHList.get(index);
-//                updateTextView();
-//            }
-//        });
-//        mHourTextWheelPicker.setCameraOffsetX(70);
-//        mHourTextWheelPicker.setSelectItem(0);
-//        mHourTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
-//
-//        //分钟
-//        mMinuteTextWheelPicker = (TextWheelPicker) findViewById(R.id.minute_text_wheel_picker);
-//        mMinuteTextWheelPicker.setTextList(mMList);
-//        mMinuteTextWheelPicker.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AbsWheelView parentView, int index) {
-//                s4 = "" + mMList.get(index);
-//                updateTextView();
-//            }
-//        });
-//        mMinuteTextWheelPicker.setCameraOffsetX(100);
-//        mMinuteTextWheelPicker.setSelectItem(1);
-//        mMinuteTextWheelPicker.setTheme(TextWheelPicker.Theme.black);
-//
-//        mTextView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, OriginalPickerActivity.class));
-//            }
-//        });
+//        getProvincesData();
+        demo();
+    }
 
+    private void demo() {
+        mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
+        PickerAdapter adapter = new PickerAdapter() {
+            @Override
+            public int numberOfComponentsInWheelPicker(WheelPicker wheelPicker) {
+                return 3;
+            }
 
-//        Collection[] data = new Collection[]{mDateList, mHList, mMList};
-//        mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
-//        mWheelPicker.setDataSource(getProvincesData());
-//        mWheelPicker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AbsWheelView parentView, int position) {
-//                s3 = "" + position;
-//                updateTextView();
-//            }
-//        });
-        getProvincesData();
+            @Override
+            public int numberOfRowsInComponent(int component) {
+                switch (component) {
+                    case 0:
+                        return 10;
+                    case 1:
+                        return 1;
+                    case 2:
+                        return 3;
+                    default:
+                        return 0;
+                }
+            }
+
+            @Override
+            public int widthForComponent(int component) {
+                return super.widthForComponent(component);
+            }
+
+            @Override
+            public int rowHeightForComponent(int component) {
+                return super.rowHeightForComponent(component);
+            }
+
+            @Override
+            public String titleForRow(int row, int component) {
+                return super.titleForRow(row, component);
+            }
+
+            @Override
+            public View viewForRow(int row, int component) {
+                return super.viewForRow(row, component);
+            }
+        };
+        mWheelPicker.setAdapter(adapter);
+        mWheelPicker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AbsWheelView parentView, int position) {
+            }
+        });
     }
 
     private void getProvincesData() {

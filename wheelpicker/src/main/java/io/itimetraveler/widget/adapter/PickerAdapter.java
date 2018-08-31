@@ -8,7 +8,7 @@ import io.itimetraveler.widget.picker.WheelPicker;
  * Created by iTimeTraveler on 2018/8/12.
  */
 
-public abstract class PickerAdapter implements PickerBaseAdapter {
+public abstract class PickerAdapter implements IPickerAdapter {
 
     /**
      * 多少列

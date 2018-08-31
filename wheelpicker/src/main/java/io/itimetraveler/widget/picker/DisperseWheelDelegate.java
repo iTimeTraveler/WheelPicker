@@ -19,7 +19,7 @@ import io.itimetraveler.widget.view.WheelView;
 /**
  * A delegate for picking up a set of texts.
  */
-class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
+class DisperseWheelDelegate extends AbstractWheelPickerDelegate {
 
     private Context mContext;
 
@@ -41,42 +41,6 @@ class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
     }
 
     @Override
-    public void init(final Collection[] dataArray, WheelPicker.OnDataChangedListener onDataChangedListener) {
-//        mContainer.removeAllViews();
-//        mWheelViews = new LinkedList<WheelView>();
-//
-//        for (int j = 0; j < dataArray.length; j++) {
-//            Collection dataSet = dataArray[j];
-//            TextWheelView textWheelView = new TextWheelView(mContext);
-//            textWheelView.setTextList((List<String>) dataSet);
-//
-//            AbsWheelView.OnItemSelectedListener listener = new AbsWheelView.OnItemSelectedListener() {
-//                @Override
-//                public void onItemSelected(AbsWheelView parentView, int position) {
-//                    int i = mWheelViews.indexOf(parentView);
-//
-//                    Collection dataSet;
-//                    if (i >= 0 && i < mWheelViews.size()) {
-//                        switch (i) {
-//                            case 0:
-//                                dataSet = ((List) dataArray[0]).get(position);
-//                                break;
-//                            case 1:
-//                                break;
-//                            case 2:
-//                                break;
-//                        }
-//                        ((TextWheelView) mWheelViews.get(i)).setTextList(dataSet);
-//                    }
-//                }
-//            };
-//            textWheelView.setOnItemSelectedListener(listener);
-//            mWheelViews.add(textWheelView);
-//            mContainer.addView(textWheelView);
-//        }
-    }
-
-    @Override
     public void setDataSource(final List[] dataArray) {
         mContainer.removeAllViews();
         mWheelViews = new LinkedList<WheelView>();
@@ -84,6 +48,9 @@ class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
         for (int j = 0; j < dataArray.length; j++) {
             List dataSet = dataArray[j];
             TextWheelView textWheelView = new TextWheelView(mContext);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, AbsWheelView.LayoutParams.WRAP_CONTENT);
+            lp.weight = 1;
+            textWheelView.setLayoutParams(lp);
 
             switch (j) {
                 case 0:
@@ -119,6 +86,7 @@ class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
             textWheelView.setOnItemSelectedListener(listener);
             mWheelViews.add(textWheelView);
             mContainer.addView(textWheelView);
+//            mDelegator.addView(textWheelView);
         }
     }
 
@@ -127,8 +95,25 @@ class DisperseWheelDelegate extends WheelPicker.AbstractWheelPickerDelegate {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void onLayout() {
+        if (mWheelViews == null) return;
+        final int count = mWheelViews.size();
 
+        int sum = 0;
+        for (int i = 0; i < count; i++) {
+            sum += ((WheelView) mWheelViews.get(i)).getMaxItemWidth();
+        }
+
+        int base = 0;
+        for (int i = 0; i < count; i++) {
+            int width = ((WheelView) mWheelViews.get(i)).getMaxItemWidth();
+            ((WheelView) mWheelViews.get(i)).setCameraOffsetX((int) (((base + width / 2) - sum / 2) * 0.5));
+            base += width;
+        }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
     }
 
     @Override
