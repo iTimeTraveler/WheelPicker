@@ -8,12 +8,14 @@ import android.view.View;
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.PickerAdapter;
+import io.itimetraveler.widget.model.IPickerData;
+import io.itimetraveler.widget.model.PickerNode;
 import io.itimetraveler.widget.view.WheelView;
 
 /**
  * An abstract class which can be used as a start for WheelPicker implementations
  */
-abstract class AbstractWheelPickerDelegate<T> implements WheelPickerDelegate {
+abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
 
     // The delegator
     protected WheelPicker mDelegator;
@@ -51,12 +53,22 @@ abstract class AbstractWheelPickerDelegate<T> implements WheelPickerDelegate {
     }
 
     @Override
+    public <N extends PickerNode> void setDataSource(List<N> nodeList) {
+    }
+
+    @Override
+    public <D extends IPickerData> void setDataSource(List<D>... dataArray) {
+    }
+
+    @Override
     public void setOnItemSelectedListener(WheelPicker.OnItemSelectedListener listener) {
         this.mOnItemSelectedListener = listener;
     }
 
     @Override
     public void onLayout() {
+        if (mWheelViews == null) return;
+
         int sum = 0;
         for (int i = 0; i < mWheelViews.size(); i++) {
             sum += mWheelViews.get(i).getMaxItemWidth();

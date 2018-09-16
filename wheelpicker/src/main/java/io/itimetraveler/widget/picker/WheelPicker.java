@@ -1,28 +1,25 @@
 package io.itimetraveler.widget.picker;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.FrameLayout;
 
-import java.util.Collection;
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.PickerAdapter;
+import io.itimetraveler.widget.model.IPickerData;
+import io.itimetraveler.widget.model.PickerNode;
 import io.itimetraveler.widget.view.AbsWheelView;
-import io.itimetraveler.widget.view.WheelView;
 
 /**
  * Created by iTimeTraveler on 2018/7/2.
  */
 public class WheelPicker extends FrameLayout {
 
-    private WheelPickerDelegate mDelegate;
+    private Context mContext;
+    private IWheelPickerDelegate mDelegate;
 
     public WheelPicker(@NonNull Context context) {
         this(context, null);
@@ -34,14 +31,17 @@ public class WheelPicker extends FrameLayout {
 
     public WheelPicker(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
-        mDelegate = new DisperseWheelDelegate(this, context);
+        mContext = context;
     }
 
-    public <T> void setDataSource(List<T> item1,
-                                  List<List<T>> item2,
-                                  List<List<List<T>>> item3) {
-        mDelegate.setDataSource(item1, item2, item3);
+    public <N extends PickerNode> void setDataSource(List<N> nodeList) {
+        mDelegate = new LinkedWheelDelegate(this, mContext);
+        mDelegate.setDataSource(nodeList);
+    }
+
+    public <D extends IPickerData> void setDataSource(List<D>... dataArray) {
+        mDelegate = new DispersedWheelDelegate(this, mContext);
+        mDelegate.setDataSource(dataArray);
     }
 
 
@@ -53,6 +53,13 @@ public class WheelPicker extends FrameLayout {
      * 是否开启联动效果
      */
     public void enableLinkage(boolean linkage) {
+    }
+
+    /**
+     * 是否开启循环
+     * @param cycle
+     */
+    public void enableCyclic(boolean cycle) {
     }
 
     /**
@@ -91,5 +98,23 @@ public class WheelPicker extends FrameLayout {
          * @param position
          */
         public void onItemSelected(AbsWheelView parentView, int position);
+    }
+
+
+    public Builder newBuilder() {
+        return new Builder(this);
+    }
+
+    public static final class Builder {
+        boolean enableLinkage;
+        boolean enableCyclic;
+
+        public Builder() {
+            enableLinkage = false;
+            enableCyclic = false;
+        }
+
+        Builder(WheelPicker wheelPicker) {
+        }
     }
 }

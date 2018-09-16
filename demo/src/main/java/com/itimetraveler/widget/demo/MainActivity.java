@@ -1,5 +1,6 @@
 package com.itimetraveler.widget.demo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -21,10 +22,11 @@ import java.util.List;
 
 import io.itimetraveler.widget.adapter.NumericWheelAdapter;
 import io.itimetraveler.widget.adapter.PickerAdapter;
-import io.itimetraveler.widget.picker.TextWheelPicker;
+import io.itimetraveler.widget.model.IPickerData;
+import io.itimetraveler.widget.model.PickerNode;
+import io.itimetraveler.widget.model.StringData;
 import io.itimetraveler.widget.picker.WheelPicker;
 import io.itimetraveler.widget.view.AbsWheelView;
-import io.itimetraveler.widget.view.TextWheelView;
 import io.itimetraveler.widget.view.WheelView;
 
 
@@ -38,9 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
     private WheelPicker mWheelPicker;
     private TextWheelView mTextWheelPicker;
-    private TextWheelPicker mDateTextWheelPicker;
-    private TextWheelPicker mHourTextWheelPicker;
-    private TextWheelPicker mMinuteTextWheelPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
         s1 = s2 = s3 = s4 = "";
         mTextView = (TextView) findViewById(R.id.hello_world);
+        mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, OriginalPickerActivity.class));
+            }
+        });
 
 //        io.itimetraveler.widget.adapter = new NumericWheelAdapter(this, 1, 15);
 //        mWheelView = (WheelView) findViewById(R.id.wheel_view);
@@ -103,10 +108,72 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //
 //        getProvincesData();
-        demo();
+//        demoPickerAdapter();
+//        testDispersed();
+        testImageWheel();
     }
 
-    private void demo() {
+    private void testImageWheel() {
+        try {
+            InputStream is = getAssets().open("flag.json");
+            int length = is.available();
+            byte[]  buffer = new byte[length];
+            is.read(buffer);
+            String result = new String(buffer, "utf8");
+
+            List<PickerNode<IPickerData>> continents = new ArrayList<>();
+
+            JSONObject jsonObject = new JSONObject(result);
+            JSONArray jsonArray = jsonObject.optJSONArray("continents");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject o = jsonArray.optJSONObject(i);
+                String pname = o.optString("name");
+                PickerNode<IPickerData> pnode = new PickerNode<IPickerData>(new StringData(pname));
+
+                List<PickerNode<IPickerData>> countries = new ArrayList<>();
+                JSONArray cityArray = o.optJSONArray("countries");
+                for (int j = 0; cityArray != null && j < cityArray.length(); j++) {
+                    JSONObject c = cityArray.optJSONObject(j);
+                    String cname = c.optString("name");
+                    String cflag = c.optString("flag");
+                    PickerNode<IPickerData> cnode = new PickerNode<IPickerData>(new FlagData(cname,"flags/" + cflag));
+//                    PickerNode<IPickerData> cnode = new PickerNode<IPickerData>(new FlagData("hcg.jpg"));
+                    countries.add(cnode);
+                }
+                pnode.setNextLevel(countries);
+                continents.add(pnode);
+            }
+
+            mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
+            mWheelPicker.setDataSource(continents);
+            mWheelPicker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AbsWheelView parentView, int position) {
+                    s3 = "" + position;
+                    updateTextView();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void testDispersed(){
+        mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
+        final List<StringData> mHList = new ArrayList<StringData>();
+        for (int i = 1; i <= 24; i++){
+            mHList.add(new StringData(String.valueOf(i)));
+        }
+        List<StringData> mMList = new ArrayList<StringData>();
+        for (int i = 1; i <= 60; i++){
+            mMList.add(new StringData(String.valueOf(i)));
+        }
+        mWheelPicker.setDataSource(mHList, mMList);
+    }
+
+    private void demoPickerAdapter() {
         mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
         PickerAdapter adapter = new PickerAdapter() {
             @Override
@@ -164,36 +231,35 @@ public class MainActivity extends AppCompatActivity {
             is.read(buffer);
             String result = new String(buffer, "utf8");
 
-            List<String> provinces = new ArrayList<>();
-            List<List<String>> cities = new ArrayList<>();
-            List<List<List<String>>> areas = new ArrayList<>();
+            List<PickerNode<IPickerData>> provinces = new ArrayList<>();
 
             JSONArray jsonArray = new JSONArray(result);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject o = jsonArray.optJSONObject(i);
                 String pname = o.optString("name");
+                PickerNode<IPickerData> pnode = new PickerNode<IPickerData>(new StringData(pname));
 
-                List<String> city = new ArrayList<>();
-                List<List<String>> city_areas = new ArrayList<>();
+                List<PickerNode<IPickerData>> city = new ArrayList<>();
                 JSONArray cityArray = o.optJSONArray("city");
                 for (int j = 0; cityArray != null && j < cityArray.length(); j++) {
                     JSONObject c = cityArray.optJSONObject(j);
-                    city.add(c.optString("name"));
+                    String cname = c.optString("name");
+                    PickerNode<IPickerData> cnode = new PickerNode<IPickerData>(new StringData(cname));
 
-                    List<String> area = new ArrayList<>();
+                    List<PickerNode<IPickerData>> area = new ArrayList<>();
                     JSONArray areaArray = c.optJSONArray("area");
                     for (int k = 0; areaArray != null && k < areaArray.length(); k++) {
-                        area.add(areaArray.optString(k));
+                        area.add(new PickerNode<IPickerData>(new StringData(areaArray.optString(k))));
                     }
-                    city_areas.add(area);
+                    cnode.setNextLevel(area);
+                    city.add(cnode);
                 }
-                areas.add(city_areas);
-                cities.add(city);
-                provinces.add(pname);
+                pnode.setNextLevel(city);
+                provinces.add(pnode);
             }
 
             mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
-            mWheelPicker.setDataSource(provinces, cities, areas);
+            mWheelPicker.setDataSource(provinces);
             mWheelPicker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AbsWheelView parentView, int position) {
@@ -249,26 +315,4 @@ public class MainActivity extends AppCompatActivity {
         TimeUtils.getInstance().setEndTime("onWindowFocusChanged > hasFocus:" + hasFocus);
     }
 
-
-//    class City {
-//        String name;
-//        List<String> countries;
-//
-//        List<String> getCitySubNames() {
-//            return countries;
-//        }
-//    }
-//
-//    class Province {
-//        String name;
-//        List<City> cities;
-//
-//        List<String> getSubNames() {
-//            List<String> r = new ArrayList<>();
-//            for (int i = 0; i < cities.size(); i++) {
-//                r.add(cities.get(i).name);
-//            }
-//            return r;
-//        }
-//    }
 }

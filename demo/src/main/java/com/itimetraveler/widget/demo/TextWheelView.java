@@ -1,4 +1,4 @@
-package io.itimetraveler.widget.view;
+package com.itimetraveler.widget.demo;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -11,9 +11,11 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.WheelAdapter;
+import io.itimetraveler.widget.view.WheelView;
 
 /**
  * Created by iTimeTraveler on 2017/12/19.
@@ -96,7 +98,7 @@ public class TextWheelView extends WheelView {
 		WHITE, BLACK
 	}
 
-	private static class TextAdapter extends WheelAdapter{
+	private class TextAdapter extends WheelAdapter{
 		private Context context;
 		private List<String> mStrList;
 		private AutoFitTextView.AutoSizeTextType autoSizeTextType = AutoFitTextView.AutoSizeTextType.NONE;

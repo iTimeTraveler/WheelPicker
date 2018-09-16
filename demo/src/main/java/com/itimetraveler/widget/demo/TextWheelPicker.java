@@ -1,4 +1,4 @@
-package io.itimetraveler.widget.picker;
+package com.itimetraveler.widget.demo;
 
 import android.content.Context;
 import android.content.res.ColorStateList;

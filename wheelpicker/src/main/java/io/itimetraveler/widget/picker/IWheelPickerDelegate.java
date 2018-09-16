@@ -6,17 +6,20 @@ import android.os.Parcelable;
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.PickerAdapter;
+import io.itimetraveler.widget.model.IPickerData;
+import io.itimetraveler.widget.model.PickerNode;
 
 /**
  * A delegate interface that defined the public API of the WheelPicker. Allows different
  * WheelPicker implementations. This would need to be implemented by the WheelPicker delegates
  * for the real behavior.
  */
-interface WheelPickerDelegate<T> {
+interface IWheelPickerDelegate {
 
     void setOnDataChangedListener(WheelPicker.OnDataChangedListener onDataChangedListener);
 
-    void setDataSource(List<T>... item1);
+    <N extends PickerNode> void setDataSource(List<N> nodeList);
+    <D extends IPickerData> void setDataSource(List<D>... dataArray);
 
     void setAdapter(PickerAdapter adapter);
 

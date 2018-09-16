@@ -37,19 +37,19 @@
         <!--android:layout_alignParentBottom="true"-->
         <!--android:orientation="horizontal">-->
 
-        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+        <!--<com.itimetraveler.widget.demo.TextWheelPickercker>-->
             <!--android:id="@+id/date_text_wheel_picker"-->
             <!--android:layout_width="0dp"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:layout_weight="3"/>-->
 
-        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+        <!--<com.itimetraveler.widget.demo.TextWheelPickercker>-->
             <!--android:id="@+id/hour_text_wheel_picker"-->
             <!--android:layout_width="0dp"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:layout_weight="1"/>-->
 
-        <!--<io.itimetraveler.widget.picker.TextWheelPicker-->
+        <!--<com.itimetraveler.widget.demo.TextWheelPickercker&ndash;&gt;-->
             <!--android:id="@+id/minute_text_wheel_picker"-->
             <!--android:layout_width="0dp"-->
             <!--android:layout_height="wrap_content"-->
