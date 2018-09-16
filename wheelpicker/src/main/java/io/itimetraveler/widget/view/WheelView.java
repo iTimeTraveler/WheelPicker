@@ -25,8 +25,8 @@ import io.itimetraveler.widget.utils.Logger;
  * Created by iTimeTraveler on 2017/12/8.
  */
 public class WheelView extends AbsWheelView {
-	private static final String TAG = "WheelView";
 
+	private static final String TAG = WheelView.class.getSimpleName();
 	private static final int SHOW_COUNT = 11;
 	private static final int NO_POSITION = -1;
 
@@ -178,6 +178,7 @@ public class WheelView extends AbsWheelView {
 //		}
 
 		setMeasuredDimension(widthSize, heightSize);
+		mWidthMeasureSpec = widthMeasureSpec;
 	}
 
 	@Override
@@ -691,7 +692,7 @@ public class WheelView extends AbsWheelView {
 		if(destoryCache){
 			view.destroyDrawingCache();
 		}
-		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+//		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
 		view.buildDrawingCache();
 		return view.getDrawingCache();

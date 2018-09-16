@@ -27,7 +27,7 @@ import io.itimetraveler.widget.utils.Logger;
  */
 public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 
-	private static final String TAG = "AbsWheelView";
+	private static final String TAG = AbsWheelView.class.getSimpleName();
 
 	/** Scrolling duration */
 	private static final int RECTIFY_ANIM_DURATION = 1000;
@@ -873,6 +873,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 			mOldItemCount = mItemCount;
 			mItemCount = getAdapter().getCount();
 			mCurrentItemIndex = 0;
+			mFirstPosition = 0;
 
 //			// Detect the case where a cursor that was previously invalidated has
 //			// been repopulated with new data.
