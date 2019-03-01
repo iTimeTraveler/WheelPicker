@@ -12,7 +12,7 @@ import android.view.Gravity;
 /**
  * 自定义TextView，文本内容自动调整字体大小以适应TextView的大小
  */
-public class AutoFitTextView extends android.support.v7.widget.AppCompatTextView {
+public class AutoFitTextView extends androidx.appcompat.widget.AppCompatTextView {
 
     private float mInitTextSize;
     private AutoSizeTextType autoSizeTextType = AutoSizeTextType.ZOOM;
