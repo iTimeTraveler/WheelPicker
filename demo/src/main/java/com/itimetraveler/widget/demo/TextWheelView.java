@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -185,7 +185,7 @@ public class TextWheelView extends WheelView {
 	/**
 	 * 自定义TextView，文本内容自动调整字体大小以适应TextView的大小
 	 */
-	static class AutoFitTextView extends android.support.v7.widget.AppCompatTextView {
+	static class AutoFitTextView extends androidx.appcompat.widget.AppCompatTextView {
 
 		private float mInitTextSize;
 		private AutoSizeTextType autoSizeTextType;

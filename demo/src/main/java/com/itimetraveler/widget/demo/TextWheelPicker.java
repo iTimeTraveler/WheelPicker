@@ -2,7 +2,7 @@ package com.itimetraveler.widget.demo;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
