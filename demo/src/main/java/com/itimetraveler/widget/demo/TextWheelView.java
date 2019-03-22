@@ -44,7 +44,7 @@ public class TextWheelView extends WheelView {
 		mStrList = list;
 		mAdapter.setTextList(list);
 		mAdapter.notifyDataSetChanged();
-		setSelectItem(0);
+		setSelection(0);
 	}
 
 	public void setTheme(Theme theme){

@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 /**
+ * 基础控件，适配 WheelView 的Adapter
+ *
  * Created by iTimeTraveler on 2017/12/9.
  */
 public abstract class WheelAdapter extends BaseAdapter {

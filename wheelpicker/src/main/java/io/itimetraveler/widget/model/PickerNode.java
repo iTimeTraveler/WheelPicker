@@ -26,19 +26,19 @@ import java.util.List;
  *         └── 4
  *             └── 8
  */
-public class PickerNode<T extends IPickerData> {
+public class PickerNode<T extends IPickerItemView> {
 
     @NonNull
     private T data;
 
     @Nullable
-    private List<PickerNode<IPickerData>> nextLevel;
+    private List<PickerNode<IPickerItemView>> nextLevel;
 
     public PickerNode(@NonNull T data) {
         this.data = data;
     }
 
-    public PickerNode(@NonNull T data, @Nullable List<PickerNode<IPickerData>> nextLevel) {
+    public PickerNode(@NonNull T data, @Nullable List<PickerNode<IPickerItemView>> nextLevel) {
         this.nextLevel = nextLevel;
     }
 
@@ -48,11 +48,11 @@ public class PickerNode<T extends IPickerData> {
     }
 
     @Nullable
-    public List<PickerNode<IPickerData>> getNextLevel() {
+    public List<PickerNode<IPickerItemView>> getNextLevel() {
         return nextLevel;
     }
 
-    public void setNextLevel(@Nullable List<PickerNode<IPickerData>> nextLevel) {
+    public void setNextLevel(@Nullable List<PickerNode<IPickerItemView>> nextLevel) {
         this.nextLevel = nextLevel;
     }
 

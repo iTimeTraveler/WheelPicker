@@ -3,11 +3,7 @@ package io.itimetraveler.widget.picker;
 import android.content.res.Configuration;
 import android.os.Parcelable;
 
-import java.util.List;
-
 import io.itimetraveler.widget.adapter.PickerAdapter;
-import io.itimetraveler.widget.model.IPickerData;
-import io.itimetraveler.widget.model.PickerNode;
 
 /**
  * A delegate interface that defined the public API of the WheelPicker. Allows different
@@ -18,12 +14,11 @@ interface IWheelPickerDelegate {
 
     void setOnDataChangedListener(WheelPicker.OnDataChangedListener onDataChangedListener);
 
-    <N extends PickerNode> void setDataSource(List<N> nodeList);
-    <D extends IPickerData> void setDataSource(List<D>... dataArray);
-
-    void setAdapter(PickerAdapter adapter);
+    void setAdapter(PickerAdapter pickerAdapter);
 
     void setOnItemSelectedListener(WheelPicker.OnItemSelectedListener listener);
+
+    int[] getSelectedPositions();
 
     void onMeasure();
     void onLayout();

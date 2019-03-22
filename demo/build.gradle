@@ -19,6 +19,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(":wheelpicker")
+    implementation project(":pickerselector")
     implementation 'androidx.appcompat:appcompat:1.0.2'
 }

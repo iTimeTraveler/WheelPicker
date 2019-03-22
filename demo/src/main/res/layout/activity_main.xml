@@ -20,48 +20,37 @@
         <!--android:visibility="gone"-->
         <!--android:background="#ffffff"/>-->
 
-    <!--<io.itimetraveler.widget.view.TextWheelView-->
-        <!--android:id="@+id/text_wheel_picker"-->
-        <!--android:layout_width="100dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingLeft="20dp"-->
-        <!--android:paddingRight="20dp"/>-->
+    <io.itimetraveler.widget.picker.TextSingleWheelPicker
+        android:id="@+id/text_wheel_picker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"/>
 
-
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingLeft="20dp"-->
-        <!--android:paddingRight="20dp"-->
-        <!--android:background="#0D0D0D"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:orientation="horizontal">-->
-
-        <!--<com.itimetraveler.widget.demo.TextWheelPickercker>-->
-            <!--android:id="@+id/date_text_wheel_picker"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="3"/>-->
-
-        <!--<com.itimetraveler.widget.demo.TextWheelPickercker>-->
-            <!--android:id="@+id/hour_text_wheel_picker"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"/>-->
-
-        <!--<com.itimetraveler.widget.demo.TextWheelPickercker&ndash;&gt;-->
-            <!--android:id="@+id/minute_text_wheel_picker"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"/>-->
-    <!--</LinearLayout>-->
-
-    <io.itimetraveler.widget.picker.WheelPicker
+    <io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker
         android:id="@+id/wheel_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:background="#ffffff"/>
+
+    <io.itimetraveler.widget.pickerselector.DigitalCipherPicker
+        android:id="@+id/digital_cipher_picker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/wheel_picker"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"/>
+
+    <io.itimetraveler.widget.pickerselector.CountryWheelPicker
+        android:id="@+id/country_wheel_picker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/digital_cipher_picker"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"/>
+
 
 </RelativeLayout>

@@ -22,6 +22,9 @@ import io.itimetraveler.widget.adapter.WheelAdapter;
 import io.itimetraveler.widget.utils.Logger;
 
 /**
+ * 基础控件
+ * - 仅提供类似ListView的任务
+ *
  * Created by iTimeTraveler on 2017/12/8.
  */
 public class WheelView extends AbsWheelView {
@@ -87,7 +90,7 @@ public class WheelView extends AbsWheelView {
 		 *  you should clear this flag.
 		 */
 		setWillNotDraw(false);
-		setSelectItem(0);
+		setSelection(0);
 		initPaints();
 	}
 
@@ -249,9 +252,6 @@ public class WheelView extends AbsWheelView {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
-
-	@Override
-	public void setSelection(int position) {}
 
 	/**
 	 * @return False to recycle the views used to measure this WheelView in
@@ -422,6 +422,11 @@ public class WheelView extends AbsWheelView {
 	 *        should be drawn
 	 */
 	private void fillDown(int pos, int nextTop) {
+		// fix bug: 上滑速度太快导致 pos 不可见时，需要往下遍历找到第一个可见的元素pos
+		while (!isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
+			pos++;
+		}
+
 		while (isDegreeVisible(getDeflectionDegree(pos)) && pos < mItemCount) {
 			// is this the selected item?
 			View child = makeAndAddView(pos, nextTop, true, getPaddingLeft(), false);
@@ -434,6 +439,11 @@ public class WheelView extends AbsWheelView {
 	@Override
 	protected void fillGap(boolean down) {
 		final int count = getChildCount();
+		Logger.e(TAG, "fillGap(" + (down ? "向上滑动" : "向下滑动") + ") "
+				+ ">>> mFirstPosition:" + mFirstPosition
+				+ ", mScrollingDegree:"+ mScrollingDegree
+				+ "， mCurrentItemIndex:" + mCurrentItemIndex);
+
 		//down表示向上滑动的操作
 		if (down) {
 			int paddingTop = getPaddingTop();
@@ -444,7 +454,6 @@ public class WheelView extends AbsWheelView {
 			int paddingBottom = getPaddingBottom();
 			final int startOffset = count > 0 ? getChildAt(0).getTop() :
 					getHeight() - paddingBottom;
-			Logger.e(TAG, "fillGap("+down+") >>> mFirstPosition:" + mFirstPosition + ", mScrollingDegree:"+ mScrollingDegree + "， mCurrentItemIndex:" + mCurrentItemIndex);
 			fillUp(mFirstPosition - 1, startOffset);
 		}
 	}
@@ -806,7 +815,8 @@ public class WheelView extends AbsWheelView {
 	 * 设置选中项
 	 * @param position
 	 */
-	public void setSelectItem(int position){
+	@Override
+	public void setSelection(int position){
 		if(mAdapter == null){
 			return;
 		}

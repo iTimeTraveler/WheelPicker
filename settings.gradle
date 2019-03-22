@@ -1,1 +1,1 @@
-include ':demo', ':wheelpicker'
+include ':demo', ':wheelpicker', ':pickerselector'

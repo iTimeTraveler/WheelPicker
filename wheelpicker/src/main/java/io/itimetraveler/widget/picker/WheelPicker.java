@@ -1,17 +1,12 @@
 package io.itimetraveler.widget.picker;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.itimetraveler.widget.adapter.PickerAdapter;
-import io.itimetraveler.widget.model.IPickerData;
-import io.itimetraveler.widget.model.PickerNode;
-import io.itimetraveler.widget.view.AbsWheelView;
 
 /**
  * Created by iTimeTraveler on 2018/7/2.
@@ -20,6 +15,7 @@ public class WheelPicker extends FrameLayout {
 
     private Context mContext;
     private IWheelPickerDelegate mDelegate;
+    private PicketOptions mOptions = new PicketOptions.Builder().build();
 
     public WheelPicker(@NonNull Context context) {
         this(context, null);
@@ -32,34 +28,22 @@ public class WheelPicker extends FrameLayout {
     public WheelPicker(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
+        if (mDelegate == null) {
+            mDelegate = mOptions != null && mOptions.isLinkage() ?
+                    new LinkedWheelDelegate(this, mContext, mOptions) :
+                    new DispersedWheelDelegate(this, mContext, mOptions);
+        }
     }
 
-    public <N extends PickerNode> void setDataSource(List<N> nodeList) {
-        mDelegate = new LinkedWheelDelegate(this, mContext);
-        mDelegate.setDataSource(nodeList);
+    public void setAdapter(PickerAdapter pickerAdapter) {
+        mDelegate = mOptions != null && mOptions.isLinkage() ?
+                new LinkedWheelDelegate(this, mContext, mOptions) :
+                new DispersedWheelDelegate(this, mContext, mOptions);
+        mDelegate.setAdapter(pickerAdapter);
     }
 
-    public <D extends IPickerData> void setDataSource(List<D>... dataArray) {
-        mDelegate = new DispersedWheelDelegate(this, mContext);
-        mDelegate.setDataSource(dataArray);
-    }
-
-
-    public void setAdapter(PickerAdapter adapter) {
-        mDelegate.setAdapter(adapter);
-    }
-
-    /**
-     * 是否开启联动效果
-     */
-    public void enableLinkage(boolean linkage) {
-    }
-
-    /**
-     * 是否开启循环
-     * @param cycle
-     */
-    public void enableCyclic(boolean cycle) {
+    public void setOptions(PicketOptions options) {
+        this.mOptions = options;
     }
 
     /**
@@ -69,6 +53,10 @@ public class WheelPicker extends FrameLayout {
      */
     public void setOnItemSelectedListener(OnItemSelectedListener l) {
         mDelegate.setOnItemSelectedListener(l);
+    }
+
+    public int[] getSelectedPositions() {
+        return mDelegate.getSelectedPositions();
     }
 
     @Override
@@ -87,7 +75,7 @@ public class WheelPicker extends FrameLayout {
      * The callback used to indicate the user changed the data.
      */
     public interface OnDataChangedListener {
-        void onDataChanged(WheelPicker view, String data);
+        void onDataChanged(WheelPicker picker, int[] indexArray);
     }
 
     public interface OnItemSelectedListener {
@@ -97,24 +85,6 @@ public class WheelPicker extends FrameLayout {
          * @param parentView
          * @param position
          */
-        public void onItemSelected(AbsWheelView parentView, int position);
-    }
-
-
-    public Builder newBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder {
-        boolean enableLinkage;
-        boolean enableCyclic;
-
-        public Builder() {
-            enableLinkage = false;
-            enableCyclic = false;
-        }
-
-        Builder(WheelPicker wheelPicker) {
-        }
+        public void onItemSelected(WheelPicker parentView, int[] position);
     }
 }

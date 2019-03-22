@@ -443,9 +443,22 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 			detachViewsFromParent(start, count);
 		}
 
+		Logger.e(TAG, "doScroll() >>> mFirstPosition1:" + mFirstPosition
+				+ ", mScrollingDegree:"+ mScrollingDegree
+				+ ", mItemAngle:"+ mItemAngle
+				+ ", mItemCount:"+ mItemCount
+				+ "， mCurrentItemIndex:" + mCurrentItemIndex);
+
+
 		if (goUp) {
 			mFirstPosition += count;
 		}
+
+		Logger.e(TAG, "doScroll() >>> mFirstPosition2:" + mFirstPosition
+				+ ", mScrollingDegree:"+ mScrollingDegree
+				+ ", mItemAngle:"+ mItemAngle
+				+ ", mItemCount:"+ mItemCount
+				+ "， mCurrentItemIndex:" + mCurrentItemIndex);
 
 		mRecycler.fullyDetachScrapViews();
 
@@ -465,11 +478,21 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 		int idealCount = scrollingDegree / mItemAngle;
 		int validCount = 0;
 
+		Logger.e("rectify before1", "scrollingDegree=" + scrollingDegree +
+				", mItemAngle=" + mItemAngle +
+				", remainDegree=" + remainDegree +
+				", idealCount=" + idealCount);
+
 		//滚动角度超过mItemAngle就顺势定位到下一个
 		if(inertia || Math.abs(remainDegree) >= mItemAngle / 2){
 			idealCount += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? 1 : -1);
 			remainDegree += (remainDegree == 0) ? 0 : ((remainDegree > 0) ? -mItemAngle : mItemAngle);
 		}
+
+		Logger.e("rectify before2", "scrollingDegree=" + scrollingDegree +
+				", mItemAngle=" + mItemAngle +
+				", remainDegree=" + remainDegree +
+				", idealCount=" + idealCount);
 
 		//如果算出来的定位偏移数量越界
 		if(idealCount > (mItemCount - mCurrentItemIndex - 1)){
@@ -494,8 +517,9 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 //		for (StackTraceElement elements : map.get(Thread.currentThread())){
 //			Logger.e("rectify -- stacks", ""+ elements.toString());
 //		}
-		Logger.e("rectify", scrollingDegree+ "/" + mItemAngle + " = "+ scrollingDegree / mItemAngle);
-		Logger.e("rectify", "mCurrentItemIndex=" + mCurrentItemIndex + ", mScrollingDegree=" + mScrollingDegree);
+		Logger.e("rectify", "scrollingDegree:" + scrollingDegree
+				+ "/" + "mItemAngle:" + mItemAngle
+				+ " = "+ scrollingDegree / mItemAngle);
 
 		//使用动画滚动到选中位置
 		if (Math.abs(mScrollingDegree) > MIN_DELTA_FOR_SCROLLING) {

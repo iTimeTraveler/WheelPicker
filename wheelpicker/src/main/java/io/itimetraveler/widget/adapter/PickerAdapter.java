@@ -1,7 +1,5 @@
 package io.itimetraveler.widget.adapter;
 
-import android.view.View;
-
 import io.itimetraveler.widget.picker.WheelPicker;
 
 /**
@@ -14,17 +12,13 @@ public abstract class PickerAdapter implements IPickerAdapter {
      * 多少列
      * @param wheelPicker
      */
-    public int numberOfComponentsInWheelPicker(WheelPicker wheelPicker) {
-        return 0;
-    }
+    public abstract int numberOfComponentsInWheelPicker(WheelPicker wheelPicker);
 
     /**
      * 某列有多少行
      * @param component
      */
-    public int numberOfRowsInComponent(int component) {
-        return 0;
-    }
+    public abstract int numberOfRowsInComponent(int component);
 
     /**
      * 某列宽度
@@ -42,22 +36,8 @@ public abstract class PickerAdapter implements IPickerAdapter {
         return 0;
     }
 
-    /**
-     * 每行的显示内容
-     * @param row
-     * @param component
-     */
-    public String titleForRow(int row, int component) {
+    @Override
+    public String labelOfComponent(int component) {
         return null;
     }
-
-    /**
-     * 每行的显示View
-     * @param row
-     * @param component
-     */
-    public View viewForRow(int row, int component) {
-        return null;
-    }
-
 }

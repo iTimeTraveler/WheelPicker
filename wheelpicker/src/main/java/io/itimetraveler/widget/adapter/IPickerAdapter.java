@@ -1,6 +1,7 @@
 package io.itimetraveler.widget.adapter;
 
 import android.view.View;
+import android.view.ViewGroup;
 
 import io.itimetraveler.widget.picker.WheelPicker;
 
@@ -35,16 +36,18 @@ interface IPickerAdapter {
     int rowHeightForComponent(int component);
 
     /**
-     * 每行的显示内容
-     * @param row
-     * @param component
-     */
-    String titleForRow(int row, int component);
-
-    /**
      * 每行的显示View
      * @param row
      * @param component
      */
-    View viewForRow(int row, int component);
+    View onCreateView(ViewGroup parent, int row, int component);
+
+    /**
+     * 每行的显示View，但已有回收复用的View
+     * @param row
+     * @param component
+     */
+    void onBindView(ViewGroup parent, View convertView, int row, int component);
+
+    String labelOfComponent(int component);
 }

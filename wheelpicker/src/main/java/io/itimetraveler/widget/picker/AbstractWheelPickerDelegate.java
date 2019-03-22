@@ -1,15 +1,22 @@
 package io.itimetraveler.widget.picker;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import io.itimetraveler.widget.adapter.PickerAdapter;
-import io.itimetraveler.widget.model.IPickerData;
-import io.itimetraveler.widget.model.PickerNode;
+import io.itimetraveler.widget.adapter.WheelAdapter;
+import io.itimetraveler.widget.view.AbsWheelView;
 import io.itimetraveler.widget.view.WheelView;
 
 /**
@@ -23,19 +30,34 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
     // The context
     protected Context mContext;
 
+    // Top-level container.
+    private ViewGroup mContainer;
+
     // Picker views.
-    protected List<WheelView> mWheelViews;
+    protected List<WheelView> mWheelViews = new LinkedList<WheelView>();;
 
     // Picker adapter.
-    protected PickerAdapter mAdapter;
+    protected PickerAdapter mPickerAdapter;
+
+    // Picker options.
+    protected PicketOptions mPicketOptions;
 
     // Callbacks
     protected WheelPicker.OnItemSelectedListener mOnItemSelectedListener;
     protected WheelPicker.OnDataChangedListener mOnDataChangedListener;
 
-    public AbstractWheelPickerDelegate(WheelPicker delegator, Context context) {
+    protected int[] mSelectedPositions;
+
+    public AbstractWheelPickerDelegate(WheelPicker delegator, Context context, PicketOptions options) {
         mDelegator = delegator;
         mContext = context;
+        mPicketOptions = options;
+
+        // Set up and attach container.
+        mContainer = new LinearLayout(context);
+        ((LinearLayout) mContainer).setGravity(LinearLayout.HORIZONTAL);
+        mContainer.setSaveFromParentEnabled(false);
+        mDelegator.addView(mContainer);
     }
 
     public void setOnItemClickListener(){}
@@ -48,21 +70,67 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
     }
 
     @Override
-    public void setAdapter(PickerAdapter adapter) {
-        mAdapter = adapter;
+    public void setAdapter(PickerAdapter pickerAdapter) {
+        mPickerAdapter = pickerAdapter;
+        mContainer.removeAllViews();
+        mWheelViews = new LinkedList<WheelView>();
+
+        int count = mPickerAdapter.numberOfComponentsInWheelPicker(mDelegator);
+        mSelectedPositions = new int[count];
+
+        // 创建用户指定数量的 WheelView 组件
+        for (int j = 0; j < count; j++) {
+            DataAdapter adapter = new DataAdapter(mPickerAdapter, j);
+
+            WheelView wheelView = new WheelView(mContext);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
+                    AbsWheelView.LayoutParams.WRAP_CONTENT);
+            lp.weight = 1;
+            wheelView.setDividerColor(mPicketOptions.getDividerColor());
+            wheelView.setLayoutParams(lp);
+            wheelView.setAdapter(adapter);
+            wheelView.setSelection(0);
+
+            mWheelViews.add(wheelView);
+            mContainer.addView(wheelView);
+
+            // 标签或单位
+            String label;
+            if (!TextUtils.isEmpty(label = mPickerAdapter.labelOfComponent(j))) {
+                LinearLayout.LayoutParams lvlp = new LinearLayout.LayoutParams(
+                        AbsWheelView.LayoutParams.WRAP_CONTENT,
+                        AbsWheelView.LayoutParams.MATCH_PARENT);
+                TextView labelView = new TextView(mContext);
+                labelView.setGravity(Gravity.CENTER_VERTICAL);
+                labelView.setLayoutParams(lvlp);
+                labelView.setText(label);
+                mContainer.addView(labelView);
+            }
+
+            final int componentIdx = j;
+            wheelView.setOnItemSelectedListener(new AbsWheelView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AbsWheelView parentView, int position) {
+                    mSelectedPositions[componentIdx] = position;
+                    if (mOnItemSelectedListener != null) {
+                        mOnItemSelectedListener.onItemSelected(mDelegator, mSelectedPositions);
+                    }
+                    onPickerItemSelected(parentView, position, componentIdx);
+                }
+            });
+        }
     }
 
-    @Override
-    public <N extends PickerNode> void setDataSource(List<N> nodeList) {
-    }
-
-    @Override
-    public <D extends IPickerData> void setDataSource(List<D>... dataArray) {
-    }
+    abstract void onPickerItemSelected(AbsWheelView parentView, int row, int componentIdx);
 
     @Override
     public void setOnItemSelectedListener(WheelPicker.OnItemSelectedListener listener) {
         this.mOnItemSelectedListener = listener;
+    }
+
+    @Override
+    public int[] getSelectedPositions() {
+        return mSelectedPositions;
     }
 
     @Override
@@ -79,6 +147,44 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
             int width = mWheelViews.get(i).getMaxItemWidth();
             mWheelViews.get(i).setCameraOffsetX((int) (((base + width / 2) - sum / 2) * 0.5));
             base += width;
+        }
+    }
+
+    /**
+     * 用于适配每个WheelView的适配器
+     */
+    private class DataAdapter extends WheelAdapter {
+        private PickerAdapter mPickerAdapter;
+        private int mIndexOfComponent;
+
+        DataAdapter(PickerAdapter pickerAdapter, int indexOfComponent){
+            this.mPickerAdapter = pickerAdapter;
+            this.mIndexOfComponent = indexOfComponent;
+        }
+
+        @Override
+        public int getCount() {
+            return mPickerAdapter.numberOfRowsInComponent(mIndexOfComponent);
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView != null) {
+                mPickerAdapter.onBindView(parent, convertView, position, mIndexOfComponent);
+            } else {
+                convertView = mPickerAdapter.onCreateView(parent, position, mIndexOfComponent);
+            }
+            return convertView;
         }
     }
 
