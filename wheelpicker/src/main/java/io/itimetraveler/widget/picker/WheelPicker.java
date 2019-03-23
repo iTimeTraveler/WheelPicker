@@ -13,9 +13,9 @@ import io.itimetraveler.widget.adapter.PickerAdapter;
  */
 public class WheelPicker extends FrameLayout {
 
-    private Context mContext;
+    protected Context mContext;
     private IWheelPickerDelegate mDelegate;
-    private PicketOptions mOptions = new PicketOptions.Builder().build();
+    protected PicketOptions mOptions = new PicketOptions.Builder().build();
 
     public WheelPicker(@NonNull Context context) {
         this(context, null);
@@ -53,6 +53,10 @@ public class WheelPicker extends FrameLayout {
      */
     public void setOnItemSelectedListener(OnItemSelectedListener l) {
         mDelegate.setOnItemSelectedListener(l);
+    }
+
+    public void setSelection(int component, int row) {
+        mDelegate.setSelection(component, row);
     }
 
     public int[] getSelectedPositions() {

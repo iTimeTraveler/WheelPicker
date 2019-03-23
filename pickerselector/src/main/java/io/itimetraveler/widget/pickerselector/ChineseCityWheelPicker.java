@@ -26,7 +26,6 @@ import io.itimetraveler.widget.picker.WheelPicker;
  */
 public class ChineseCityWheelPicker extends WheelPicker {
 
-    private Context mContext;
 
     public ChineseCityWheelPicker(Context context) {
         this(context, null);
@@ -38,7 +37,6 @@ public class ChineseCityWheelPicker extends WheelPicker {
 
     public ChineseCityWheelPicker(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext = context;
         init();
     }
 

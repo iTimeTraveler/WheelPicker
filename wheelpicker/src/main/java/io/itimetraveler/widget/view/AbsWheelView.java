@@ -151,6 +151,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 		mRecycler.clear();
 
 		mAdapter = adapter;
+		mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
 		mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
 
 		requestLayout();
@@ -183,7 +184,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 	/**
 	 * Notify our item selected listener (if there is one) of a change after finishing scrolling.
 	 */
-	protected void invokeOnItemScrollListener() {
+	protected void invokeOnItemSelectedListener() {
 		if (mOnItemSelectedListener != null) {
 			mOnItemSelectedListener.onItemSelected(this, mCurrentItemIndex);
 		}
@@ -674,7 +675,7 @@ public abstract class AbsWheelView extends AdapterView<WheelAdapter> {
 		mLastScrollingDegree = 0;
 
 		postInvalidate();
-		invokeOnItemScrollListener();
+		invokeOnItemSelectedListener();
 	}
 
 	/**

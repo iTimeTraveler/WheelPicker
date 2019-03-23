@@ -6,20 +6,31 @@ package io.itimetraveler.widget.picker;
 public class PicketOptions {
 
     public static final int DEFAULT_DIVIDER_COLOR = 0xFF333333;
+    public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
+
+    //默认配置
+    public static final int DEFAULT_TEXT_SIZE = 20;
+    public static final int DEFAULT_TEXT_COLOR = 0xFFAAAAAA;
+    public static final int SELECTED_TEXT_COLOR = 0xFF333333;
+
 
     // 联动效果
-    boolean linkage;
+    private boolean linkage;
 
     // 是否循环
-    boolean cyclic;
+    private boolean cyclic;
 
     // 分割线颜色
-    int dividerColor;
+    private int dividerColor;
+
+    // 背景颜色
+    private int backgroundColor;
 
     private PicketOptions(Builder builder) {
         this.linkage = builder.linkage;
         this.cyclic = builder.cyclic;
         this.dividerColor = builder.dividerColor;
+        this.backgroundColor = builder.backgroundColor;
     }
 
     public boolean isLinkage() {
@@ -34,6 +45,10 @@ public class PicketOptions {
         return dividerColor;
     }
 
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
     public Builder newBuilder() {
         return new Builder(this);
     }
@@ -43,12 +58,13 @@ public class PicketOptions {
         boolean linkage;
         boolean cyclic;
         int dividerColor = DEFAULT_DIVIDER_COLOR;
+        int backgroundColor = DEFAULT_BACKGROUND_COLOR;
 
         public Builder() {
             this.linkage = false;
         }
 
-        public Builder(PicketOptions options) {
+        private Builder(PicketOptions options) {
             this.linkage = options.linkage;
             this.cyclic = options.cyclic;
         }
@@ -65,6 +81,11 @@ public class PicketOptions {
 
         public Builder dividerColor(int dividerColor) {
             this.dividerColor = dividerColor;
+            return this;
+        }
+
+        public Builder backgroundColor(int backgroundColor) {
+            this.backgroundColor = backgroundColor;
             return this;
         }
 

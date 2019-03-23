@@ -18,7 +18,10 @@ public class DigitalCipherPicker extends WheelPicker {
 
     private static final int DEFAULT_COMPONENT_COUNT = 6;
 
+    public static final int DEFAULT_ROW_COUNT = 10;
+
     private int mCountOfComponents = DEFAULT_COMPONENT_COUNT;
+    private int mCountOfRows = DEFAULT_ROW_COUNT;
 
     public DigitalCipherPicker(Context context) {
         this(context, null);
@@ -30,14 +33,18 @@ public class DigitalCipherPicker extends WheelPicker {
 
     public DigitalCipherPicker(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+//        init();
     }
 
     public void setCipherCount(int count) {
         this.mCountOfComponents = count;
     }
 
-    private void init() {
+    public void setRows(int count) {
+        this.mCountOfRows = count;
+    }
+
+    public void show() {
         PickerAdapter adapter = new PickerAdapter() {
             @Override
             public int numberOfComponentsInWheelPicker(WheelPicker wheelPicker) {
@@ -46,7 +53,7 @@ public class DigitalCipherPicker extends WheelPicker {
 
             @Override
             public int numberOfRowsInComponent(int component) {
-                return 10;
+                return mCountOfRows;
             }
 
             @Override

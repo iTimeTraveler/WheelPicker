@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/hello_world"
@@ -11,14 +12,6 @@
         android:text="Hello World!"
         android:layout_centerInParent="true"/>
     
-    <!--<io.itimetraveler.widget.view.WheelView-->
-        <!--android:id="@+id/wheel_view"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingLeft="20dp"-->
-        <!--android:paddingRight="20dp"-->
-        <!--android:visibility="gone"-->
-        <!--android:background="#ffffff"/>-->
 
     <io.itimetraveler.widget.picker.TextSingleWheelPicker
         android:id="@+id/text_wheel_picker"
@@ -28,6 +21,46 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"/>
 
+    <Button
+        android:id="@+id/chinese_city_wheelpicker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAllCaps="false"
+        android:text="ChineseCityWheelPicker（城市选择器）"/>
+
+    <Button
+        android:id="@+id/date_wheelpicker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAllCaps="false"
+        android:text="DateWheelPicker（日期选择器）"/>
+
+    <Button
+        android:id="@+id/time_wheelpicker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAllCaps="false"
+        android:text="DateWheelPicker（时间选择器）"/>
+
+    <Button
+        android:id="@+id/country_wheelpicker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAllCaps="false"
+        android:text="CountryWheelPicker（国家选择器）"/>
+
+    <Button
+        android:id="@+id/digital_wheelpicker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAllCaps="false"
+        android:text="DigitalWheelPicker（密码选择器）"/>
+
     <io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker
         android:id="@+id/wheel_picker"
         android:layout_width="match_parent"
@@ -36,21 +69,5 @@
         android:paddingRight="20dp"
         android:background="#ffffff"/>
 
-    <io.itimetraveler.widget.pickerselector.DigitalCipherPicker
-        android:id="@+id/digital_cipher_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/wheel_picker"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"/>
 
-    <io.itimetraveler.widget.pickerselector.CountryWheelPicker
-        android:id="@+id/country_wheel_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/digital_cipher_picker"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"/>
-
-
-</RelativeLayout>
+</LinearLayout>

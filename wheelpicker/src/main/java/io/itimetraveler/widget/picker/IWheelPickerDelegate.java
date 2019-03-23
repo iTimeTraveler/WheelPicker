@@ -16,6 +16,8 @@ interface IWheelPickerDelegate {
 
     void setAdapter(PickerAdapter pickerAdapter);
 
+    void setSelection(int component, int row);
+
     void setOnItemSelectedListener(WheelPicker.OnItemSelectedListener listener);
 
     int[] getSelectedPositions();

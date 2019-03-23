@@ -14,6 +14,9 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.Nullable;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +61,8 @@ public class WheelView extends AbsWheelView {
 	private static final float CAMERA_LOCATION_Z = 0.5f;
 
 	private static final int BACKGROUND_COLOR_MASK = 0x00FFFFFF;
+
+	private Handler mMainHandler = new Handler(Looper.getMainLooper());
 
 	/**
 	 * Constructor
@@ -789,6 +794,11 @@ public class WheelView extends AbsWheelView {
 		return SHOW_COUNT;
 	}
 
+	@Override
+	public int getCount() {
+		return mItemCount;
+	}
+
 	public int getMaxItemWidth() {
 		return mMaxItemWidth;
 	}
@@ -820,13 +830,19 @@ public class WheelView extends AbsWheelView {
 		if(mAdapter == null){
 			return;
 		}
+
 		position = Math.max(Math.min(position, mAdapter.getCount() - 1), 0);
 		int idealFirst = position - ((SHOW_COUNT - 2) >> 1);
 		mCurrentItemIndex = position;
 		mFirstPosition = Math.max(idealFirst, 0);
 
-		requestLayout();
-		invalidate();
-		invokeOnItemScrollListener();
+		mMainHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				requestLayout();
+				invalidate();
+			}
+		});
+		invokeOnItemSelectedListener();
 	}
 }

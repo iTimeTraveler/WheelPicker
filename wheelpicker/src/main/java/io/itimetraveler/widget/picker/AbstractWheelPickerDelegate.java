@@ -1,7 +1,6 @@
 package io.itimetraveler.widget.picker;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -9,7 +8,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +15,7 @@ import java.util.List;
 import io.itimetraveler.widget.adapter.PickerAdapter;
 import io.itimetraveler.widget.adapter.WheelAdapter;
 import io.itimetraveler.widget.view.AbsWheelView;
+import io.itimetraveler.widget.view.BorderLabelTextView;
 import io.itimetraveler.widget.view.WheelView;
 
 /**
@@ -34,7 +33,7 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
     private ViewGroup mContainer;
 
     // Picker views.
-    protected List<WheelView> mWheelViews = new LinkedList<WheelView>();;
+    protected List<WheelView> mWheelViews = new LinkedList<WheelView>();
 
     // Picker adapter.
     protected PickerAdapter mPickerAdapter;
@@ -55,7 +54,7 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
 
         // Set up and attach container.
         mContainer = new LinearLayout(context);
-        ((LinearLayout) mContainer).setGravity(LinearLayout.HORIZONTAL);
+        ((LinearLayout) mContainer).setGravity(Gravity.CENTER);
         mContainer.setSaveFromParentEnabled(false);
         mDelegator.addView(mContainer);
     }
@@ -87,6 +86,7 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
                     AbsWheelView.LayoutParams.WRAP_CONTENT);
             lp.weight = 1;
             wheelView.setDividerColor(mPicketOptions.getDividerColor());
+            wheelView.setBackgroundColor(mPicketOptions.getBackgroundColor());
             wheelView.setLayoutParams(lp);
             wheelView.setAdapter(adapter);
             wheelView.setSelection(0);
@@ -99,8 +99,14 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
             if (!TextUtils.isEmpty(label = mPickerAdapter.labelOfComponent(j))) {
                 LinearLayout.LayoutParams lvlp = new LinearLayout.LayoutParams(
                         AbsWheelView.LayoutParams.WRAP_CONTENT,
-                        AbsWheelView.LayoutParams.MATCH_PARENT);
-                TextView labelView = new TextView(mContext);
+                        AbsWheelView.LayoutParams.WRAP_CONTENT);
+                BorderLabelTextView labelView = new BorderLabelTextView(mContext,
+                        mPicketOptions.getDividerColor(),
+                        mPicketOptions.getBackgroundColor());
+                labelView.setPadding(20, 4, 20, 4);
+                labelView.setTextSize(20);
+                labelView.setTextColor(PicketOptions.SELECTED_TEXT_COLOR);
+
                 labelView.setGravity(Gravity.CENTER_VERTICAL);
                 labelView.setLayoutParams(lvlp);
                 labelView.setText(label);
@@ -119,6 +125,8 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
                 }
             });
         }
+
+        mContainer.setBackgroundColor(mPicketOptions.getBackgroundColor());
     }
 
     abstract void onPickerItemSelected(AbsWheelView parentView, int row, int componentIdx);
@@ -126,6 +134,16 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
     @Override
     public void setOnItemSelectedListener(WheelPicker.OnItemSelectedListener listener) {
         this.mOnItemSelectedListener = listener;
+    }
+
+    @Override
+    public void setSelection(int component, int row) {
+        if (component >= 0 && component < mWheelViews.size()) {
+            WheelView wheelView = mWheelViews.get(component);
+            if (row >= 0 && row < wheelView.getCount()) {
+                wheelView.setSelection(row);
+            }
+        }
     }
 
     @Override
