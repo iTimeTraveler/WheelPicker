@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:textAllCaps="false"
-        android:text="DateWheelPicker（时间选择器）"/>
+        android:text="TimeWheelPicker（时间选择器）"/>
 
     <Button
         android:id="@+id/country_wheelpicker_button"

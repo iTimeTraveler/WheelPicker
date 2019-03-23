@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
-                        showDialog("TimeWheelPicker\n(城市选择器)", picker);
+                        showDialog("TimeWheelPicker\n(时间选择器)", picker);
                     }
                 });
 
