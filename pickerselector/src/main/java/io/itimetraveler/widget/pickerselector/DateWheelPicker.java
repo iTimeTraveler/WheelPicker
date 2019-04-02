@@ -163,11 +163,11 @@ public class DateWheelPicker extends WheelPicker {
             public View onCreateView(ViewGroup parent, int row, int component) {
                 switch (component) {
                     case 0:
-                        return new StringItemView(String.valueOf(mMinDate.get(Calendar.YEAR) + row)).onCreateView(parent);
+                        return new StringItemView(String.valueOf(mMinDate.get(Calendar.YEAR) + row) + "年").onCreateView(parent);
                     case 1:
-                        return new StringItemView(String.valueOf(row + 1)).onCreateView(parent);
+                        return new StringItemView(String.valueOf(row + 1) + "月").onCreateView(parent);
                     case 2:
-                        return new StringItemView(String.valueOf(row + 1)).onCreateView(parent);
+                        return new StringItemView(String.valueOf(row + 1) + "日").onCreateView(parent);
                 }
                 return null;
             }
@@ -176,32 +176,33 @@ public class DateWheelPicker extends WheelPicker {
             public void onBindView(ViewGroup parent, View convertView, int row, int component) {
                 switch (component) {
                     case 0:
-                        new StringItemView(String.valueOf(mMinDate.get(Calendar.YEAR) + row)).onBindView(parent, convertView, row);
+                        new StringItemView(String.valueOf(mMinDate.get(Calendar.YEAR) + row) + "年").onBindView(parent, convertView, row);
                         break;
                     case 1:
-                        new StringItemView(String.valueOf(row + 1)).onBindView(parent, convertView, row);
+                        new StringItemView(String.valueOf(row + 1) + "月").onBindView(parent, convertView, row);
                         break;
                     case 2:
-                        new StringItemView(String.valueOf(row + 1)).onBindView(parent, convertView, row);
+                        new StringItemView(String.valueOf(row + 1) + "日").onBindView(parent, convertView, row);
                         break;
                 }
             }
 
             @Override
             public String labelOfComponent(int component) {
-                switch (component) {
-                    case 0:
-                        return "年";
-                    case 1:
-                        return "月";
-                    case 2:
-                        return "日";
-                }
+//                switch (component) {
+//                    case 0:
+//                        return "年";
+//                    case 1:
+//                        return "月";
+//                    case 2:
+//                        return "日";
+//                }
                 return "";
             }
         };
 
         setOptions(new PicketOptions.Builder()
+                .dividedEqually(false)
                 .linkage(true)
                 .build());
         setAdapter(adapter);

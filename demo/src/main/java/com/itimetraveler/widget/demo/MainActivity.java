@@ -75,10 +75,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         TimeWheelPicker picker = new TimeWheelPicker(MainActivity.this);
-                        picker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
+                        picker.setOnTimeChangedListener(new TimeWheelPicker.OnTimeChangedListener() {
                             @Override
-                            public void onItemSelected(WheelPicker parentView, int[] position) {
-
+                            public void onTimeChanged(TimeWheelPicker view, int hourOfDay, int minute) {
+                                Toast.makeText(MainActivity.this, hourOfDay + "/" + minute,
+                                        Toast.LENGTH_SHORT).show();
                             }
                         });
                         showDialog("TimeWheelPicker\n(时间选择器)", picker);
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         v.setPadding(20, 20, 20, 20);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
-                .setTitle(title)
+                .setTitle(title.substring(0, title.indexOf('\n')))
                 .setView(v)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override

@@ -5,6 +5,7 @@ package io.itimetraveler.widget.picker;
  */
 public class PicketOptions {
 
+    public static final boolean DEFAULT_DIVIDED_EQUALLY = true;
     public static final int DEFAULT_DIVIDER_COLOR = 0xFF333333;
     public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
 
@@ -20,6 +21,9 @@ public class PicketOptions {
     // 是否循环
     private boolean cyclic;
 
+    // 是否均等分
+    private boolean dividedEqually;
+
     // 分割线颜色
     private int dividerColor;
 
@@ -29,6 +33,7 @@ public class PicketOptions {
     private PicketOptions(Builder builder) {
         this.linkage = builder.linkage;
         this.cyclic = builder.cyclic;
+        this.dividedEqually = builder.dividedEqually;
         this.dividerColor = builder.dividerColor;
         this.backgroundColor = builder.backgroundColor;
     }
@@ -39,6 +44,10 @@ public class PicketOptions {
 
     public boolean isCyclic() {
         return cyclic;
+    }
+
+    public boolean isDividedEqually() {
+        return dividedEqually;
     }
 
     public int getDividerColor() {
@@ -57,8 +66,9 @@ public class PicketOptions {
 
         boolean linkage;
         boolean cyclic;
-        int dividerColor = DEFAULT_DIVIDER_COLOR;
-        int backgroundColor = DEFAULT_BACKGROUND_COLOR;
+        private boolean dividedEqually = DEFAULT_DIVIDED_EQUALLY;
+        private int dividerColor = DEFAULT_DIVIDER_COLOR;
+        private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
 
         public Builder() {
             this.linkage = false;
@@ -76,6 +86,11 @@ public class PicketOptions {
 
         public Builder cyclic(boolean cyclic) {
             this.cyclic = cyclic;
+            return this;
+        }
+
+        public Builder dividedEqually(boolean dividedEqually) {
+            this.dividedEqually = dividedEqually;
             return this;
         }
 

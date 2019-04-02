@@ -77,14 +77,20 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
         int count = mPickerAdapter.numberOfComponentsInWheelPicker(mDelegator);
         mSelectedPositions = new int[count];
 
+        // 空白填充
+        fillGapWithBlackLine(mContainer);
+
         // 创建用户指定数量的 WheelView 组件
         for (int j = 0; j < count; j++) {
             DataAdapter adapter = new DataAdapter(mPickerAdapter, j);
 
             WheelView wheelView = new WheelView(mContext);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    mPicketOptions.isDividedEqually() ? 0 : AbsWheelView.LayoutParams.WRAP_CONTENT,
                     AbsWheelView.LayoutParams.WRAP_CONTENT);
-            lp.weight = 1;
+            if (mPicketOptions.isDividedEqually()) {
+                lp.weight = 1;
+            }
             wheelView.setDividerColor(mPicketOptions.getDividerColor());
             wheelView.setBackgroundColor(mPicketOptions.getBackgroundColor());
             wheelView.setLayoutParams(lp);
@@ -126,6 +132,9 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
             });
         }
 
+        // 空白填充
+        fillGapWithBlackLine(mContainer);
+
         mContainer.setBackgroundColor(mPicketOptions.getBackgroundColor());
     }
 
@@ -166,6 +175,31 @@ abstract class AbstractWheelPickerDelegate implements IWheelPickerDelegate {
             mWheelViews.get(i).setCameraOffsetX((int) (((base + width / 2) - sum / 2) * 0.5));
             base += width;
         }
+    }
+
+    /**
+     * 使用选中线填充指示器的左右空白处
+     * @param viewGroup
+     */
+    private void fillGapWithBlackLine(ViewGroup viewGroup) {
+        // 空白填充
+        LinearLayout.LayoutParams lvlp = new LinearLayout.LayoutParams(AbsWheelView.LayoutParams.WRAP_CONTENT,
+                AbsWheelView.LayoutParams.WRAP_CONTENT);
+        // 滚轮控件填充不满时，空白强制左右延伸到填满
+        if (!mPicketOptions.isDividedEqually()) {
+            lvlp.weight = 1;
+        }
+        BorderLabelTextView labelView = new BorderLabelTextView(mContext,
+                mPicketOptions.getDividerColor(),
+                mPicketOptions.getBackgroundColor());
+        labelView.setPadding(0, 4, 0, 4);
+        labelView.setTextSize(20);
+        labelView.setTextColor(PicketOptions.SELECTED_TEXT_COLOR);
+
+        labelView.setGravity(Gravity.CENTER_VERTICAL);
+        labelView.setLayoutParams(lvlp);
+        labelView.setText(" ");
+        viewGroup.addView(labelView);
     }
 
     /**
