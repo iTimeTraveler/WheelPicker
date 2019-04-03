@@ -21,7 +21,7 @@ public class PicketOptions {
     // 是否循环
     private boolean cyclic;
 
-    // 是否均等分
+    // 多个滚轮宽度是否均等分
     private boolean dividedEqually;
 
     // 分割线颜色
