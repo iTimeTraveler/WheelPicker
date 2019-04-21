@@ -27,6 +27,7 @@ import io.itimetraveler.widget.picker.WheelPicker;
 public class CountryWheelPicker extends WheelPicker {
 
     private Context mContext;
+    private OnCountrySelectListener mOnCountrySelectListener;
 
     public CountryWheelPicker(Context context) {
         this(context, null);
@@ -96,6 +97,16 @@ public class CountryWheelPicker extends WheelPicker {
                 .linkage(true)
                 .build());
         setAdapter(adapter);
+
+        setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(WheelPicker parentView, int[] position) {
+                if (mOnCountrySelectListener != null) {
+                    mOnCountrySelectListener.OnCountrySelected(CountryWheelPicker.this,
+                            ((FlagItemView) flags.get(position[0]).getNextLevel().get(position[1]).getData()).getData());
+                }
+            }
+        });
     }
 
 
@@ -123,7 +134,6 @@ public class CountryWheelPicker extends WheelPicker {
                     String cname = c.optString("name");
                     String cflag = c.optString("flag");
                     PickerNode<IPickerItemView> cnode = new PickerNode<IPickerItemView>(new FlagItemView(cname,"flags/" + cflag));
-//                    PickerNode<IPickerItemView> cnode = new PickerNode<IPickerItemView>(new FlagItemView("hcg.jpg"));
                     countries.add(cnode);
                 }
                 pnode.setNextLevel(countries);
@@ -137,5 +147,13 @@ public class CountryWheelPicker extends WheelPicker {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void setOnCountrySelectListener(OnCountrySelectListener onCountrySelectListener) {
+        mOnCountrySelectListener = onCountrySelectListener;
+    }
+
+    public interface OnCountrySelectListener {
+        void OnCountrySelected(CountryWheelPicker view, String countrySelected);
     }
 }

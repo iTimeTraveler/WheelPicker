@@ -1,13 +1,8 @@
 package com.itimetraveler.widget.demo;
 
-import android.app.Dialog;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +22,6 @@ import io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker;
 import io.itimetraveler.widget.pickerselector.CountDownWheelPicker;
 import io.itimetraveler.widget.pickerselector.CountryWheelPicker;
 import io.itimetraveler.widget.pickerselector.DateWheelPicker;
-import io.itimetraveler.widget.pickerselector.DigitalCipherPicker;
 import io.itimetraveler.widget.pickerselector.TimeWheelPicker;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private String s1, s2, s3, s4;
 
-    private ChineseCityWheelPicker mChineseCityWheelPicker;
-    private DigitalCipherPicker mDigitalCipherPicker;
     private TextSingleWheelPicker mTextSingleWheelPicker;
 
     @Override
@@ -46,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
         s1 = s2 = s3 = s4 = "";
         mTextView = (TextView) findViewById(R.id.hello_world);
+        mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, UsageActivity.class));
+            }
+        });
 
         // 城市选择器
         findViewById(R.id.chinese_city_wheelpicker_button)
@@ -135,43 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void showDialog(String title, View v) {
-        final Context mContext = MainActivity.this;
-        v.setPadding(20, 20, 20, 20);
-
-        final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
-        View contentView = LayoutInflater.from(this).inflate(R.layout.dialog_content_normal, null);
-
-        TextView titleView = contentView.findViewById(R.id.title);
-        titleView.setText(title);
-
-        View confrimView = contentView.findViewById(R.id.button_confirm);
-        View cancelView = contentView.findViewById(R.id.button_cancel);
-        LinearLayout content = contentView.findViewById(R.id.content);
-        confrimView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bottomDialog.dismiss();
-                Toast.makeText(mContext, "ok", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        cancelView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bottomDialog.dismiss();
-                Toast.makeText(mContext, "no", Toast.LENGTH_SHORT).show();
-            }
-        });
-        content.removeAllViews();
-        content.addView(v);
-        bottomDialog.setContentView(contentView);
-        ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
-        layoutParams.width = getResources().getDisplayMetrics().widthPixels;
-        contentView.setLayoutParams(layoutParams);
-        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
-        bottomDialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
-        bottomDialog.setCanceledOnTouchOutside(true);
-        bottomDialog.show();
+        DialogUtil.showDialog(MainActivity.this, title, v);
     }
 
 

@@ -25,6 +25,8 @@ import io.itimetraveler.widget.picker.WheelPicker;
  * Created by iTimeTraveler on 2019/3/20.
  */
 public class ChineseCityWheelPicker extends WheelPicker {
+    
+    private OnCitySelectListener mOnCitySelectListener;
 
 
     public ChineseCityWheelPicker(Context context) {
@@ -104,6 +106,15 @@ public class ChineseCityWheelPicker extends WheelPicker {
         setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
             @Override
             public void onItemSelected(WheelPicker parentView, int[] position) {
+                String province = ((StringItemView) provinces.get(position[0]).getData()).getData();
+                String city = ((StringItemView) provinces.get(position[0]).getNextLevel()
+                        .get(position[1]).getData()).getData();
+                String area = ((StringItemView) provinces.get(position[0]).getNextLevel()
+                        .get(position[1]).getNextLevel()
+                        .get(position[2]).getData()).getData();
+                if (mOnCitySelectListener != null) {
+                    mOnCitySelectListener.OnCitySelected(ChineseCityWheelPicker.this, province, city, area);
+                }
             }
         });
     }
@@ -151,5 +162,14 @@ public class ChineseCityWheelPicker extends WheelPicker {
         }
 
         return null;
+    }
+
+
+    public void setOnCitySelectListener(OnCitySelectListener onCitySelectListener) {
+        mOnCitySelectListener = onCitySelectListener;
+    }
+
+    public interface OnCitySelectListener {
+        void OnCitySelected(ChineseCityWheelPicker view, String province, String city, String area);
     }
 }

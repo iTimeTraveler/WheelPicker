@@ -40,7 +40,7 @@ public class TimeWheelPicker extends WheelPicker {
 
     // 日期：年月日
     public static final int TYPE_DATE = TYPE_YEAR | TYPE_MONTH | TYPE_DAY;
-    // 时间：小时、分钟
+    // 时间：小时、分钟、AM/PM
     public static final int TYPE_TIME = TYPE_HOUR | TYPE_MINUTE | TYPE_AM_PM;
     // 全部
     public static final int TYPE_ALL = TYPE_DATE | TYPE_TIME;
@@ -49,13 +49,16 @@ public class TimeWheelPicker extends WheelPicker {
     public static final NumberFormat DEFAULT_MINUTE_FORMAT = new DecimalFormat("###00");
     public static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy年MM月dd日");
     public static final DateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm");
+    public static final Format dateFormat = new SimpleDateFormat("MM月dd日");
+    public static final Format weekFormat = new SimpleDateFormat("E");
 
+    private Calendar mCurrentDate;
 
     private int mType = TYPE_MIXED_DATE | TYPE_TIME;
     private Context mContext;
     private int mCount;
     private List<Integer> mTypeMap = new ArrayList<Integer>();
-    private List<String> mMixedDateList = new ArrayList<String>();
+    private List<Calendar> mMixedDateList = new ArrayList<Calendar>();
     private OnTimeChangedListener mOnTimeChangedListener;
 
     public TimeWheelPicker(Context context) {
@@ -150,9 +153,55 @@ public class TimeWheelPicker extends WheelPicker {
                 .build());
         setAdapter(adapter);
 
+        for (int i = 0; i < mCount; i++) {
+            int type = mTypeMap.get(i);
+            switch (type) {
+                case TYPE_YEAR:
+                    setSelection(i, 365);
+                    break;
+                case TYPE_MONTH:
+                    break;
+                case TYPE_DAY:
+                    break;
+                case TYPE_HOUR:
+                    break;
+                case TYPE_MINUTE:
+                    break;
+                case TYPE_AM_PM:
+                    break;
+                case TYPE_MIXED_DATE:
+                    break;
+                case TYPE_MIXED_TIME:
+                    break;
+            }
+        }
+
         setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
             @Override
             public void onItemSelected(WheelPicker parentView, int[] position) {
+//                int count = position.length;
+//                for (int i = 0; i < count; i++) {
+//                    int type = mTypeMap.get(component);
+//                    switch (type) {
+//                        case TYPE_YEAR:
+//                            return 100;
+//                        case TYPE_MONTH:
+//                            return 12;
+//                        case TYPE_DAY:
+//                            return 30;
+//                        case TYPE_HOUR:
+//                            return 12;
+//                        case TYPE_MINUTE:
+//                            return 60;
+//                        case TYPE_AM_PM:
+//                            return 2;
+//                        case TYPE_MIXED_DATE:
+//                            return 365 * 2;
+//                        case TYPE_MIXED_TIME:
+//                            break;
+//                    }
+//                }
+
                 if (mOnTimeChangedListener != null) {
                     mOnTimeChangedListener.onTimeChanged(TimeWheelPicker.this, position[0], position[1]);
                 }
@@ -175,24 +224,23 @@ public class TimeWheelPicker extends WheelPicker {
         }
     }
 
-    private List<String> generateDateList(int daysCount){
-        Format dateFormat = new SimpleDateFormat("MM月dd日");
-        Format weekFormat = new SimpleDateFormat("E");
-
+    private List<Calendar> generateDateList(int daysCount){
         final int todayIdx = daysCount;
-        String[] arr = new String[daysCount * 2 + 1];
+        Calendar[] arr = new Calendar[daysCount * 2 + 1];
         for(int i = daysCount; i > 0; i--){
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
             c.add(Calendar.DAY_OF_MONTH, -i);   // 今天-1天
-            arr[todayIdx - i] = dateFormat.format(c.getTime()) + " " + weekFormat.format(c.getTime());
+            arr[todayIdx - i] = c;
 
             Calendar c1 = Calendar.getInstance();
             c1.setTime(new Date());
             c1.add(Calendar.DAY_OF_MONTH, i);   // 今天+1天
-            arr[todayIdx + i] = dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime());
+            arr[todayIdx + i] = c;
         }
-        arr[todayIdx] = "今天";
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        arr[todayIdx] = c;
 
         return Arrays.asList(arr);
     }
@@ -210,7 +258,8 @@ public class TimeWheelPicker extends WheelPicker {
             case TYPE_AM_PM:
                 return AM_PM_DESC[row];
             case TYPE_MIXED_DATE:
-                return mMixedDateList.get(row);
+                Calendar c = mMixedDateList.get(row);
+                return dateFormat.format(c.getTime()) + " " + weekFormat.format(c.getTime());
             case TYPE_MIXED_TIME:
                 break;
         }
@@ -232,5 +281,7 @@ public class TimeWheelPicker extends WheelPicker {
          * @param minute The current minute.
          */
         void onTimeChanged(TimeWheelPicker view, int hourOfDay, int minute);
+
+//        void onTimeChanged(TimeWheelPicker view, Date date);
     }
 }

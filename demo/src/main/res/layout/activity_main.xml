@@ -7,9 +7,11 @@
 
     <TextView
         android:id="@+id/hello_world"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:padding="15dp"
+        android:gravity="center"
+        android:text="Open Demo Page"
         android:layout_centerInParent="true"/>
     
 

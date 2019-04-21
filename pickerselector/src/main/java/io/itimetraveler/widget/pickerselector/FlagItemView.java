@@ -15,6 +15,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
+import io.itimetraveler.widget.model.BasePickerItemView;
 import io.itimetraveler.widget.model.IPickerItemView;
 import io.itimetraveler.widget.pickerselector.R;
 
@@ -22,7 +23,7 @@ import io.itimetraveler.widget.pickerselector.R;
  * Created by iTimeTraveler on 2018/9/16.
  */
 
-class FlagItemView implements IPickerItemView {
+class FlagItemView extends BasePickerItemView<String> {
 
     private String name;
     private String path;
@@ -31,6 +32,7 @@ class FlagItemView implements IPickerItemView {
     private int mSelectColor = 0xFF333333;
 
     public FlagItemView(String name, String path) {
+        super(name);
         this.name = name;
         this.path = path;
     }
