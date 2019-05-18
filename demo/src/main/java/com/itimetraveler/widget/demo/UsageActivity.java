@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 import androidx.appcompat.app.AppCompatActivity;
 import io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker;
 import io.itimetraveler.widget.pickerselector.CountryWheelPicker;
@@ -78,8 +80,8 @@ public class UsageActivity extends AppCompatActivity {
                 TimeWheelPicker picker = new TimeWheelPicker(UsageActivity.this);
                 picker.setOnTimeChangedListener(new TimeWheelPicker.OnTimeChangedListener() {
                     @Override
-                    public void onTimeChanged(TimeWheelPicker view, int hourOfDay, int minute) {
-                        timeTv.setText(hourOfDay + "/" + minute);
+                    public void onTimeChanged(TimeWheelPicker view, Calendar date) {
+                        timeTv.setText(TimeWheelPicker.DEFAULT_DATE_FORMAT.format(date.getTime()) + " " + TimeWheelPicker.DEFAULT_TIME_FORMAT.format(date.getTime()));
                     }
                 });
                 DialogUtil.showDialog(UsageActivity.this, "", picker);

@@ -24,11 +24,11 @@ public class DateWheelPicker extends WheelPicker {
     private static final int DEFAULT_START_YEAR = 1900;
     private static final int DEFAULT_END_YEAR = 2100;
 
-    private final DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+    protected final DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
 
-    private Calendar mCurrentDate;
-    private Calendar mMinDate;
-    private Calendar mMaxDate;
+    protected Calendar mCurrentDate;
+    protected Calendar mMinDate;
+    protected Calendar mMaxDate;
     private Calendar mTempDate;
 
     private OnDateChangedListener mOnDateChangedListener;

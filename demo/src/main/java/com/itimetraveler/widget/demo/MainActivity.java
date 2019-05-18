@@ -70,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
                         TimeWheelPicker picker = new TimeWheelPicker(MainActivity.this);
                         picker.setOnTimeChangedListener(new TimeWheelPicker.OnTimeChangedListener() {
                             @Override
-                            public void onTimeChanged(TimeWheelPicker view, int hourOfDay, int minute) {
-                                Toast.makeText(MainActivity.this, hourOfDay + "/" + minute,
+                            public void onTimeChanged(TimeWheelPicker view, Calendar date) {
+                                Toast.makeText(MainActivity.this, TimeWheelPicker.DEFAULT_TIME_FORMAT.format(date),
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
