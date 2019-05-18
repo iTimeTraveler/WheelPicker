@@ -17,34 +17,23 @@ import io.itimetraveler.widget.picker.WheelPicker;
 public class DigitalCipherPicker extends WheelPicker {
 
     private static final int DEFAULT_COMPONENT_COUNT = 6;
-
-    public static final int DEFAULT_ROW_COUNT = 10;
+    private static final int DEFAULT_ROW_COUNT = 10;
 
     private int mCountOfComponents = DEFAULT_COMPONENT_COUNT;
     private int mCountOfRows = DEFAULT_ROW_COUNT;
 
     public DigitalCipherPicker(Context context) {
-        this(context, null);
+        this(context, DEFAULT_COMPONENT_COUNT, DEFAULT_ROW_COUNT);
     }
 
-    public DigitalCipherPicker(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+    public DigitalCipherPicker(Context context, int components, int rows) {
+        super(context);
+        this.mCountOfComponents = components;
+        this.mCountOfRows = rows;
+        init();
     }
 
-    public DigitalCipherPicker(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-//        init();
-    }
-
-    public void setCipherCount(int count) {
-        this.mCountOfComponents = count;
-    }
-
-    public void setRows(int count) {
-        this.mCountOfRows = count;
-    }
-
-    public void show() {
+    public void init() {
         PickerAdapter adapter = new PickerAdapter() {
             @Override
             public int numberOfComponentsInWheelPicker(WheelPicker wheelPicker) {

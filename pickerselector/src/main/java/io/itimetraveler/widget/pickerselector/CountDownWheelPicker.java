@@ -1,41 +1,36 @@
 package io.itimetraveler.widget.pickerselector;
 
 import android.content.Context;
-import android.util.AttributeSet;
 
 /**
  * Created by iTimeTraveler on 2019/3/22.
  */
 public class CountDownWheelPicker extends DigitalCipherPicker {
 
-    private int maxCount;
+    private static final int DEFAULT_ROW_COUNT = 10;
+
+    private int maxCount = DEFAULT_ROW_COUNT;
 
     public CountDownWheelPicker(Context context) {
-        this(context, null);
+        this(context, DEFAULT_ROW_COUNT);
     }
 
-    public CountDownWheelPicker(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public CountDownWheelPicker(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    public void setMaxCount(int maxCount) {
+    public CountDownWheelPicker(Context context, int maxCount) {
+        super(context, 1, maxCount);
         this.maxCount = maxCount;
-        setRows(maxCount);
+        init0();
     }
 
-    public void show() {
-        setCipherCount(1);
+    private void init0() {
         setEnabled(false);
         setSelection(0, maxCount - 1);
+    }
 
+    public void startCountDown() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = maxCount; i > 0; i--) {
+                for (int i = maxCount - 1; i >= 0; i--) {
                     try {
                         Thread.sleep(1000);
                         CountDownWheelPicker.this.setSelection(0, i);
@@ -47,6 +42,4 @@ public class CountDownWheelPicker extends DigitalCipherPicker {
             }
         }).start();
     }
-
-
 }

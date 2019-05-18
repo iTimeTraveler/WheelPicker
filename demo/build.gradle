@@ -20,5 +20,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":pickerselector")
+//    implementation 'io.itimetraveler:pickerselector:0.0.0.1'
     implementation 'androidx.appcompat:appcompat:1.0.2'
 }

@@ -106,6 +106,13 @@ public class ChineseCityWheelPicker extends WheelPicker {
         setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
             @Override
             public void onItemSelected(WheelPicker parentView, int[] position) {
+
+                // 排除联动产生的非法选项
+                if (position[0] >= provinces.size() || position[1] >= provinces.get(position[0]).getNextLevel().size()
+                        || position[2] >= provinces.get(position[0]).getNextLevel().get(position[1]).getNextLevel().size()) {
+                    return;
+                }
+
                 String province = ((StringItemView) provinces.get(position[0]).getData()).getData();
                 String city = ((StringItemView) provinces.get(position[0]).getNextLevel()
                         .get(position[1]).getData()).getData();

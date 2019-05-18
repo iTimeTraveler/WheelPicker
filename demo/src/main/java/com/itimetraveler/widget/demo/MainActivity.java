@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 国家选择器
         findViewById(R.id.country_wheelpicker_button)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        // 时间选择器
         findViewById(R.id.time_wheelpicker_button)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                         picker.setOnTimeChangedListener(new TimeWheelPicker.OnTimeChangedListener() {
                             @Override
                             public void onTimeChanged(TimeWheelPicker view, Calendar date) {
-                                Toast.makeText(MainActivity.this, TimeWheelPicker.DEFAULT_TIME_FORMAT.format(date),
+                                Toast.makeText(MainActivity.this, TimeWheelPicker.DEFAULT_TIME_FORMAT.format(date.getTime()),
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -101,7 +103,9 @@ public class MainActivity extends AppCompatActivity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        showDialog("CountDownWheelPicker\n(倒计时器)", new CountDownWheelPicker(MainActivity.this));
+                        CountDownWheelPicker countDownWheelPicker = new CountDownWheelPicker(MainActivity.this, 11);
+                        showDialog("CountDownWheelPicker\n(倒计时器)", countDownWheelPicker);
+                        countDownWheelPicker.startCountDown();
                     }
                 });
 
