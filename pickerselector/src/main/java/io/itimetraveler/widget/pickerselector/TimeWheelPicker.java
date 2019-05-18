@@ -29,6 +29,7 @@ import io.itimetraveler.widget.picker.WheelPicker;
  */
 public class TimeWheelPicker extends DateWheelPicker {
 
+    private static final int DEFAULT_MIX_DATE_COUNT = 200;
     public static final NumberFormat DEFAULT_MINUTE_FORMAT = new DecimalFormat("###00");
     public static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy年MM月dd日");
     public static final DateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm");
@@ -115,7 +116,7 @@ public class TimeWheelPicker extends DateWheelPicker {
                     case TYPE_AM_PM:
                         return AM_PM_DESC.length;
                     case TYPE_MIXED_DATE:
-                        return 365 * 2;
+                        return DEFAULT_MIX_DATE_COUNT * 2;
                     case TYPE_MIXED_TIME:
                         break;
                 }
@@ -187,7 +188,7 @@ public class TimeWheelPicker extends DateWheelPicker {
                     }
                     break;
                 case TYPE_MIXED_DATE:
-                    setSelection(i, 365);
+                    setSelection(i, DEFAULT_MIX_DATE_COUNT);
                     break;
                 case TYPE_MIXED_TIME:
                     break;
@@ -253,7 +254,7 @@ public class TimeWheelPicker extends DateWheelPicker {
         }
 
         if ((mType & TYPE_MIXED_DATE) > 0) {
-            mMixedDateList = generateDateList(365);
+            mMixedDateList = generateDateList(DEFAULT_MIX_DATE_COUNT);
         }
     }
 
@@ -267,7 +268,7 @@ public class TimeWheelPicker extends DateWheelPicker {
     private List<Calendar> generateDateList(int daysCount){
         final int todayIdx = daysCount;
         Calendar[] arr = new Calendar[daysCount * 2 + 1];
-        for(int i = daysCount; i > 0; i--){
+        for(int i = 1; i <= daysCount; i++){
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
             c.add(Calendar.DAY_OF_MONTH, -i);   // 今天-1天
@@ -276,7 +277,7 @@ public class TimeWheelPicker extends DateWheelPicker {
             Calendar c1 = Calendar.getInstance();
             c1.setTime(new Date());
             c1.add(Calendar.DAY_OF_MONTH, i);   // 今天+1天
-            arr[todayIdx + i] = c;
+            arr[todayIdx + i] = c1;
         }
         Calendar c = Calendar.getInstance();
         c.setTime(new Date());
