@@ -15,7 +15,7 @@
         android:layout_centerInParent="true"/>
     
 
-    <io.itimetraveler.widget.picker.TextSingleWheelPicker
+    <io.itimetraveler.widget.pickerselector.TextSingleWheelPicker
         android:id="@+id/text_wheel_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -63,13 +63,12 @@
         android:textAllCaps="false"
         android:text="DigitalWheelPicker（密码选择器）"/>
 
-    <io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker
+    <io.itimetraveler.widget.picker.WheelPicker
         android:id="@+id/wheel_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:background="#ffffff"/>
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"/>
 
 
 </LinearLayout>

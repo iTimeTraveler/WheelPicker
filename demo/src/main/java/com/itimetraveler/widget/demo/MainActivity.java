@@ -1,27 +1,29 @@
 package com.itimetraveler.widget.demo;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itimetraveler.widget.demo.R;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
-import io.itimetraveler.widget.picker.TextSingleWheelPicker;
+import io.itimetraveler.widget.adapter.PickerAdapter;
+import io.itimetraveler.widget.model.StringItemView;
+import io.itimetraveler.widget.picker.PicketOptions;
 import io.itimetraveler.widget.picker.WheelPicker;
 import io.itimetraveler.widget.pickerselector.ChineseCityWheelPicker;
 import io.itimetraveler.widget.pickerselector.CountDownWheelPicker;
 import io.itimetraveler.widget.pickerselector.CountryWheelPicker;
 import io.itimetraveler.widget.pickerselector.DateWheelPicker;
+import io.itimetraveler.widget.pickerselector.TextSingleWheelPicker;
 import io.itimetraveler.widget.pickerselector.TimeWheelPicker;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private String s1, s2, s3, s4;
 
     private TextSingleWheelPicker mTextSingleWheelPicker;
+    private WheelPicker mWheelPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,35 +136,80 @@ public class MainActivity extends AppCompatActivity {
         });
 //        mTextSingleWheelPicker.setSelection(10);
         mTextSingleWheelPicker.setTheme(TextSingleWheelPicker.Theme.white);
+
+
+        mWheelPicker = (WheelPicker) findViewById(R.id.wheel_picker);
+        mWheelPicker.setOptions(new PicketOptions.Builder()
+                .linkage(false)                                             // 是否联动
+                .dividedEqually(false)                                      // 每列宽度是否均等分
+                .backgroundColor(Color.parseColor("#000000"))     // 背景颜色
+                .dividerColor(Color.parseColor("#999999"))        // 选中项分割线颜色
+                .build());
+
+        PickerAdapter adapter = new PickerAdapter() {
+            @Override
+            public int numberOfComponentsInWheelPicker(WheelPicker wheelPicker) {
+                // 需要多少列
+                return 2;
+            }
+
+            @Override
+            public int numberOfRowsInComponent(int component) {
+                // 某一列有多少行数据
+                switch (component) {
+                    case 0:
+                        return 10;
+                    case 1:
+                        return mList.size();
+                }
+                return 0;
+            }
+
+            @Override
+            public View onCreateView(ViewGroup parent, int row, int component) {
+                // 某行某列显示的View，String 数据可使用默认 StringItemView 类
+                String str = "";
+                switch (component) {
+                    case 0:
+                        str = "" + row;
+                        break;
+                    case 1:
+                        str = mList.get(row);
+                        break;
+                }
+                return new StringItemView(String.valueOf(str)).onCreateView(parent);
+            }
+
+            @Override
+            public void onBindView(ViewGroup parent, View convertView, int row, int component) {
+                // 回收的View，仅需根据某行某列刷新数据。String 数据可使用默认 StringItemView 类
+                String str = "";
+                switch (component) {
+                    case 0:
+                        str = "" + row;
+                        break;
+                    case 1:
+                        str = mList.get(row);
+                        break;
+                }
+                new StringItemView(String.valueOf(str)).onBindView(parent, convertView, row);
+            }
+        };
+        mWheelPicker.setAdapter(adapter);
+        mWheelPicker.setOnItemSelectedListener(new WheelPicker.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(WheelPicker parentView, int[] position) {
+                // 选中后的回调
+                s1 = "" + position[0];
+                s2 = mList.get(position[1]);
+                updateTextView();
+            }
+        });
     }
 
 
     private void showDialog(String title, View v) {
         DialogUtil.showDialog(MainActivity.this, title, v);
-    }
-
-
-    private List<String> generateDateList(int daysCount){
-        Format dateFormat = new SimpleDateFormat("MM月dd日");
-        Format weekFormat = new SimpleDateFormat("E");
-        Date today = new Date();
-
-        final int todayIdx = daysCount;
-        String[] arr = new String[daysCount * 2 + 1];
-        for(int i = daysCount; i > 0; i--){
-            Calendar c = Calendar.getInstance();
-            c.setTime(new Date());
-            c.add(Calendar.DAY_OF_MONTH, -i);   // 今天-1天
-            arr[todayIdx - i] = dateFormat.format(c.getTime()) + " " + weekFormat.format(c.getTime());
-
-            Calendar c1 = Calendar.getInstance();
-            c1.setTime(new Date());
-            c1.add(Calendar.DAY_OF_MONTH, i);   // 今天+1天
-            arr[todayIdx + i] = dateFormat.format(c1.getTime()) + " " + weekFormat.format(c1.getTime());
-        }
-        arr[todayIdx] = dateFormat.format(today) + " 今天";
-
-        return Arrays.asList(arr);
     }
 
     private void updateTextView(){
