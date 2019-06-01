@@ -6,10 +6,12 @@ publish {
     userOrg = 'itimetraveler'
     groupId = 'io.itimetraveler'
     artifactId = 'pickerselector'
-    publishVersion = '0.0.0.1'
+    publishVersion = '0.0.0.2'
     desc = 'A wheel picker for Android, support DateWheelPicker.'
 //    website = 'https://github.com/novoda/bintray-release'
 }
+
+// ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=9ab07cd66e9b3cce217191ab0dc306631f335e1a -PdryRun=false
 
 android {
     compileSdkVersion 28

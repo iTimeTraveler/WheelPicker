@@ -1,15 +1,15 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'com.novoda.bintray-release'
-//
-//publish {
-//    repoName = 'maven' // 这里填你自己仓库的Name
-//    userOrg = 'itimetraveler'
-//    groupId = 'io.itimetraveler'
-//    artifactId = 'wheelpicker'
-//    publishVersion = '0.0.1.1-SNAPSHOT'
-//    desc = 'A wheel picker for Android, support DateWheelPicker.'
-////    website = 'https://github.com/novoda/bintray-release'
-//}
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    repoName = 'maven' // 这里填你自己仓库的Name
+    userOrg = 'itimetraveler'
+    groupId = 'io.itimetraveler'
+    artifactId = 'wheelpicker'
+    publishVersion = '0.0.0.1'
+    desc = 'A wheel picker for Android, support DateWheelPicker.'
+//    website = 'https://github.com/novoda/bintray-release'
+}
 
 android {
     compileSdkVersion 28

@@ -54,14 +54,16 @@ public class TimeWheelPicker extends DateWheelPicker {
     // 时间：小时(24制)、分钟
     public static final int TYPE_24_TIME = TYPE_HOUR | TYPE_MINUTE;
 
+    public static final int TYPE_DEFAULT_TIME = TYPE_MIXED_DATE | TYPE_24_TIME;
+
     /** 可选项 */
-    @IntDef({TYPE_12_TIME, TYPE_24_TIME, TYPE_MIXED_DATE, (TYPE_MIXED_DATE | TYPE_24_TIME)})
+    @IntDef({TYPE_12_TIME, TYPE_24_TIME, TYPE_MIXED_DATE, TYPE_DEFAULT_TIME})
     @Retention(RetentionPolicy.SOURCE)
     private @interface SelectorType {}
 
     public static final AmPm[] AM_PM_DESC = {AmPm.AM, AmPm.PM};
 
-    @SelectorType private int mType =  TYPE_MIXED_DATE | TYPE_24_TIME;
+    @SelectorType private int mType =  TYPE_DEFAULT_TIME;
     private int mCount;
     private List<Integer> mTypeMap = new ArrayList<Integer>();
     private List<Calendar> mMixedDateList = new ArrayList<Calendar>();

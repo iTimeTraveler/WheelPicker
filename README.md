@@ -16,7 +16,7 @@ Step 1. Add the dependency to `build.gradle`.
 
 ```groovy
 dependencies {
-  compile 'io.itimetraveler:pickerselector:0.0.0.1'
+  compile 'io.itimetraveler:pickerselector:0.0.0.2'
 }
 ```
 
