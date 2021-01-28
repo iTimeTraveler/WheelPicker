@@ -1,6 +1,7 @@
 package io.itimetraveler.widget.pickerselector;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,7 +134,7 @@ public class CountryWheelPicker extends WheelPicker {
                     JSONObject c = cityArray.optJSONObject(j);
                     String cname = c.optString("name");
                     String cflag = c.optString("flag");
-                    PickerNode<IPickerItemView> cnode = new PickerNode<IPickerItemView>(new FlagItemView(cname,"flags/" + cflag));
+                    PickerNode<IPickerItemView> cnode = new PickerNode<IPickerItemView>(new FlagItemView(mContext, cname,"flags/" + cflag));
                     countries.add(cnode);
                 }
                 pnode.setNextLevel(countries);
