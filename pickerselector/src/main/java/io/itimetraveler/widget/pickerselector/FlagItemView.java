@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.itimetraveler.widget.model.BasePickerItemView;
-import io.itimetraveler.widget.model.IPickerItemView;
-import io.itimetraveler.widget.pickerselector.R;
 
 /**
  * Created by iTimeTraveler on 2018/9/16.
@@ -26,15 +24,15 @@ import io.itimetraveler.widget.pickerselector.R;
 class FlagItemView extends BasePickerItemView<String> {
 
     private String name;
-    private String path;
+    private Bitmap bitmap;
 
     private int mDefaultColor = 0xFFAAAAAA;
     private int mSelectColor = 0xFF333333;
 
-    public FlagItemView(String name, String path) {
+    public FlagItemView(Context context, String name, String path) {
         super(name);
         this.name = name;
-        this.path = path;
+        this.bitmap = getImageFromAssetsFile(context, path);
     }
 
     private Bitmap getImageFromAssetsFile(Context context, String fileName) {
@@ -62,7 +60,7 @@ class FlagItemView extends BasePickerItemView<String> {
     }
 
     @Override
-    public View onCreateView(ViewGroup parent) {
+    public View onCreateView(final ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         LinearLayout root = (LinearLayout) inflater.inflate(R.layout.flag_item, null);
         TextView textView = root.findViewById(R.id.name);
@@ -74,7 +72,7 @@ class FlagItemView extends BasePickerItemView<String> {
         int[] colors = new int[] {mSelectColor, mDefaultColor};
         int[][] states = {{android.R.attr.state_selected}, {}};
         textView.setTextColor(new ColorStateList(states, colors));
-        imageView.setImageBitmap(getImageFromAssetsFile(parent.getContext(), path));
+        imageView.setImageBitmap(bitmap);
 
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.textView = textView;
@@ -84,11 +82,11 @@ class FlagItemView extends BasePickerItemView<String> {
     }
 
     @Override
-    public void onBindView(ViewGroup parent, View convertView, int position) {
-        Object object = convertView.getTag();
+    public void onBindView(final ViewGroup parent, View convertView, int position) {
+        final Object object = convertView.getTag();
         if(object instanceof ViewHolder){
             ((ViewHolder) object).textView.setText(name);
-            ((ViewHolder) object).imageView.setImageBitmap(getImageFromAssetsFile(parent.getContext(), path));
+            ((ViewHolder) object).imageView.setImageBitmap(bitmap);
         }
     }
 
